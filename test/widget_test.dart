@@ -8,7 +8,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:flutter_chinese_chess_ai_mobile/main.dart';
+import 'package:flutter_chinese_chess_ai_mobile/main_app_release.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {

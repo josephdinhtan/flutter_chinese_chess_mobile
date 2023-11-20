@@ -8,19 +8,21 @@
             "name": "flutter_chinese_chess_ai_mobile",
             "request": "launch",
             "type": "dart",
-            "flutterMode": "debug"
+            "flutterMode": "debug",
+            "program": "lib/main_app_debug.dart"
+        },
+        {
+            "name": "flutter_chinese_chess_ai_mobile (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release",
+            "program": "lib/main_app_release.dart"
         },
         {
             "name": "flutter_chinese_chess_ai_mobile (profile mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
-        },
-        {
-            "name": "flutter_chinese_chess_ai_mobile (release mode)",
-            "request": "launch",
-            "type": "dart",
-            "flutterMode": "release"
         }
     ]
 }

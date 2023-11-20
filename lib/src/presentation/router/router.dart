@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_chinese_chess_ai_mobile/src/presentation/screens/battle_screen.dart';
-import '../screens/settings_screen.dart';
+import 'package:flutter_chinese_chess_ai_mobile/src/presentation/screens/battle_screens/battle_screen.dart';
+import '../screens/settings_screen/settings_screen.dart';
 
 enum GameScene {
   unknown,
@@ -30,5 +30,9 @@ class JdtRouter {
     await Navigator.of(context).push(
       CupertinoPageRoute(builder: (context) => page),
     );
+  }
+
+  static void pop(BuildContext context) {
+    Navigator.pop(context);
   }
 }

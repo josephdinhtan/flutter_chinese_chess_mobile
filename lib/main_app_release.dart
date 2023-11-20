@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'src/presentation/screens/main_menu_screen.dart';
+import 'src/presentation/screens/main_menu_screen/main_menu_screen.dart';
 
 void main() {
   runApp(const ChessAppAi());

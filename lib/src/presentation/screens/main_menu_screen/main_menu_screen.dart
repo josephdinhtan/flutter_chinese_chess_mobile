@@ -1,8 +1,10 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 
-import '../config/colors/game_colors.dart';
-import '../config/styles/game_fonts.dart';
-import '../router/router.dart';
+import '../../config/colors/game_colors.dart';
+import '../../config/styles/game_fonts.dart';
+import '../../router/router.dart';
 
 class MainMenuScreen extends StatelessWidget {
   const MainMenuScreen({super.key});
@@ -11,9 +13,7 @@ class MainMenuScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: GameColors.menuBackground,
-      body: Center(
-        child: buildActionControls(context),
-      ),
+      body: buildActionControls(context),
     );
   }
 
@@ -24,14 +24,31 @@ class MainMenuScreen extends StatelessWidget {
       color: GameColors.primary,
     );
 
-    return Expanded(
-      flex: 4,
+    return Center(
       child: Column(
         children: [
-          const Expanded(flex: 2, child: SizedBox()),
+          const Expanded(flex: 40, child: SizedBox()),
           TextButton(
             child: Text(
-              'Man-machine exercise',
+              'Phân tích cuộc cờ',
+              style: menuItemStyle,
+            ),
+            onPressed: () =>
+                JdtRouter.navigateTo(context: context, scene: GameScene.battle),
+          ),
+          const Expanded(child: SizedBox()),
+          TextButton(
+            child: Text(
+              'Luyện chơi với máy',
+              style: menuItemStyle,
+            ),
+            onPressed: () =>
+                JdtRouter.navigateTo(context: context, scene: GameScene.battle),
+          ),
+          const Expanded(child: SizedBox()),
+          TextButton(
+            child: Text(
+              'Cờ thế',
               style: menuItemStyle,
             ),
             onPressed: () =>
@@ -52,7 +69,7 @@ class MainMenuScreen extends StatelessWidget {
             onPressed: () {},
             child: Text('Release Notes', style: menuItemStyle),
           ),
-          const Expanded(flex: 4, child: SizedBox()),
+          const Expanded(flex: 40, child: SizedBox()),
         ],
       ),
     );
