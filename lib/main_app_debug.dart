@@ -1,35 +1,92 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:wakelock/wakelock.dart';
 
 import 'src/presentation/screens/main_menu_screen/main_menu_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const ChessAppAi());
+  SystemChrome.setPreferredOrientations(
+    [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown],
+  );
+
+  if (Platform.isAndroid) {
+    // SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+    //     overlays: [SystemUiOverlay.bottom]);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
+  }
+
+  if (Platform.isIOS) {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack, overlays: []);
+  }
 }
 
 class ChessAppAi extends StatefulWidget {
   const ChessAppAi({super.key});
 
+  static final navKey = GlobalKey<NavigatorState>();
+  static get context => navKey.currentContext;
+
   @override
   State<ChessAppAi> createState() => _ChessAppAiState();
 }
 
-class _ChessAppAiState extends State<ChessAppAi> {
+class _ChessAppAiState extends State<ChessAppAi> with WidgetsBindingObserver {
   @override
   void initState() {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-        overlays: SystemUiOverlay.values);
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    Wakelock.enable();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    //
+    super.didChangeAppLifecycleState(state);
+
+    switch (state) {
+      case AppLifecycleState.resumed:
+        Wakelock.enable();
+        //Audios.loopBgm();
+        break;
+      case AppLifecycleState.inactive:
+        break;
+      case AppLifecycleState.paused:
+        //Audios.stopBgm();
+        //HybridEngine().stop();
+        Wakelock.disable();
+        break;
+      case AppLifecycleState.detached:
+        //Audios.release();
+        Wakelock.disable();
+        //HybridEngine().shutdown();
+        break;
+      case AppLifecycleState.hidden:
+        Wakelock.disable();
+      // TODO: Handle this case.
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: ChessAppAi.navKey,
       theme: ThemeData(
         useMaterial3: true,
         //fontFamily: "Ios17Font",
+        primarySwatch: Colors.brown,
       ),
-      home: const MainMenuScreen(),
+      home: const Scaffold(body: MainMenuScreen()),
+      debugShowCheckedModeBanner: false,
     );
   }
 }

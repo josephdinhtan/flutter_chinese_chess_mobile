@@ -49,6 +49,11 @@ class _OperationBarState extends State<OperationBar> {
             onPressed: () {},
           ),
           IconButton(
+            icon: Icon(Icons.screen_search_desktop_outlined),
+            tooltip: "Ai arrow",
+            onPressed: () {},
+          ),
+          IconButton(
             icon: Icon(Icons.edit),
             tooltip: "Sửa bàn cờ",
             onPressed: () {},

@@ -12,7 +12,7 @@ class GameColors {
   static const lightBackground = Color(0xFFEEE0CB);
   static const specialBackground = Color(0xFF555555);
   static const menuBackground = Color(0xFFEFDECF);
-  static const battleBackground = Color(0xFFEFDECF);
+  static const battleBackground = Colors.white;
   static const battleDrawerBackground = Color(0xFFEFDECF);
   static final iconColor = Colors.grey.withOpacity(0.7);
 

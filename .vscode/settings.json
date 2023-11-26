@@ -1,8 +1,17 @@
 {
     "cSpell.words": [
+        "bestmove",
         "calloc",
         "chessai",
         "circlepath",
-        "pikafish"
+        "jlog",
+        "movetime",
+        "nnue",
+        "nobestmove",
+        "pikafish",
+        "ponderhit",
+        "regx",
+        "setoption",
+        "ucinewgame"
     ]
 }

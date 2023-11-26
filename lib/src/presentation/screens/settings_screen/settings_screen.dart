@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_chinese_chess_ai_mobile/src/presentation/router/router.dart';
 import 'package:jdt_ui/jdt_ui.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -26,7 +27,11 @@ class SettingsScreen extends StatelessWidget {
                   SettingsTile.navigation(
                     title: const Text('Parameter'),
                     value: const Text('Configuration'),
-                    onPressed: (context) {},
+                    onPressed: (context) {
+                      JdtRouter.navigateTo(
+                          context: context,
+                          scene: GameScene.settingsEngineParameter);
+                    },
                   ),
                   SettingsTile.switchTile(
                     onToggle: (value) {},
