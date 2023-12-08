@@ -1,0 +1,28 @@
+{
+  "width": 745,
+  "height": 862,
+  "size": 80,
+  "offset": {
+    "dx": 12,
+    "dy": 30
+  },
+  "board": "board.png",
+  "red": {
+    "K": "rk.png",
+    "A": "ra.png",
+    "B": "rb.png",
+    "C": "rc.png",
+    "N": "rn.png",
+    "R": "rr.png",
+    "P": "rp.png"
+  },
+  "black": {
+    "k": "bk.png",
+    "a": "ba.png",
+    "b": "bb.png",
+    "c": "bc.png",
+    "n": "bn.png",
+    "r": "br.png",
+    "p": "bp.png"
+  }
+}

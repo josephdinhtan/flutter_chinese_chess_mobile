@@ -5,9 +5,25 @@ import 'package:flutter/material.dart';
 import '../../config/colors/game_colors.dart';
 import '../../config/styles/game_fonts.dart';
 import '../../router/router.dart';
+import '../battle_page_temp/data_base/local_data.dart';
 
-class MainMenuScreen extends StatelessWidget {
+class MainMenuScreen extends StatefulWidget {
   const MainMenuScreen({super.key});
+
+  @override
+  State<MainMenuScreen> createState() => _MainMenuScreenState();
+}
+
+class _MainMenuScreenState extends State<MainMenuScreen> {
+  @override
+  void initState() {
+    initAsync();
+    super.initState();
+  }
+
+  Future<void> initAsync() async {
+    await LocalData().load();
+  }
 
   @override
   Widget build(BuildContext context) {

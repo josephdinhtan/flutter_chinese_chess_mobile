@@ -1,0 +1,22 @@
+name: cchess_ui
+description: Jdt cchess_ui using asset resources
+version: 1.0.1
+
+environment:
+  sdk: '>=3.1.2 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/skins/wood_light/
+    - assets/skins/wood_polish/
+    - assets/skins/wood_ziga/

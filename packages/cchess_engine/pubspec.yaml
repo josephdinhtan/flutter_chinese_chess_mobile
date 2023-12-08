@@ -8,6 +8,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  pikafish_engine: ^1.0.3
   date_format: ^2.0.7
   path_provider: ^2.1.1
 

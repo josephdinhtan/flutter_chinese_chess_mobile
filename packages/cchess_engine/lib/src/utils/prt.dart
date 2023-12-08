@@ -1,4 +1,6 @@
+import 'dart:developer';
+
 void prt(Object? object) {
   // ignore: avoid_print
-  print(object.toString());
+  log(object.toString(), name: "Test name");
 }

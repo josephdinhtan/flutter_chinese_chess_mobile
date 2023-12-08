@@ -10,12 +10,12 @@ dependencies:
   flutter:
     sdk: flutter
   jdt_ui:
-    # path: D:/Flutter/Flutter_projects/Flutter_Jdt_projects/jdt_ui
+    # path: D:/Flutter/Flutter_projects/Flutter_Jdt_projects/jdt_ui 
     git:
       url: https://github.com/josephdinhtan/flutter_jdt_widgets.git
       ref: main
-  cchess_engine: 
-    path: ./packages/cchess_engine
+  # cchess_engine: 
+  #   path: ./packages/cchess_engine
 
   cupertino_icons: ^1.0.2
   wakelock: ^0.6.2
@@ -23,6 +23,8 @@ dependencies:
   date_format: ^2.0.7
   path_provider: ^2.1.1
   provider: ^6.1.1
+  pikafish_engine: ^1.0.3
+  in_app_review: ^2.0.8
 
 dev_dependencies:
   flutter_test:
@@ -44,3 +46,8 @@ flutter:
     - family: XiaoLi
       fonts:
         - asset: fonts/hanyixiaoli.ttf
+  assets:
+    - assets/skins/wood_light/
+    - assets/skins/wood_polish/
+    - assets/skins/wood_ziga/
+    - assets/engine/pikafish.nnue

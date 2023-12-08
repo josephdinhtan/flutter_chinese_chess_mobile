@@ -2,9 +2,14 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:wakelock/wakelock.dart';
 
+import 'src/presentation/screens/battle_page_temp/engine/hybrid_engine.dart';
+import 'src/presentation/screens/battle_page_temp/state_controllers/board_state.dart';
+import 'src/presentation/screens/battle_page_temp/state_controllers/page_state.dart';
 import 'src/presentation/screens/main_menu_screen/main_menu_screen.dart';
+import 'src/utils/logging/prt.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,6 +45,8 @@ class _ChessAppAiState extends State<ChessAppAi> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     Wakelock.enable();
+    //checkTestAsyncFun();
+    startUpEngine();
   }
 
   @override
@@ -78,17 +85,37 @@ class _ChessAppAiState extends State<ChessAppAi> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      navigatorKey: ChessAppAi.navKey,
-      theme: ThemeData(
-        useMaterial3: true,
-        //fontFamily: "Ios17Font",
-        primarySwatch: Colors.brown,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<BoardState>(create: (_) => BoardState()),
+        ChangeNotifierProvider<PageState>(create: (_) => PageState()),
+      ],
+      child: MaterialApp(
+        navigatorKey: ChessAppAi.navKey,
+        theme: ThemeData(
+          useMaterial3: true,
+          //fontFamily: "Ios17Font",
+          primarySwatch: Colors.brown,
+        ),
+        home: const Scaffold(body: MainMenuScreen()),
+        debugShowCheckedModeBanner: false,
       ),
-      home: const Scaffold(body: MainMenuScreen()),
-      debugShowCheckedModeBanner: false,
     );
   }
+
+  Future<void> startUpEngine() async {
+    await HybridEngine().startup();
+  }
+
+  // void checkTestAsyncFun() async {
+  //   final cchessEngine = CchessEngine();
+  //   Future.delayed(const Duration(seconds: 1));
+  //   prt("Jdt cchessEngine.startup()");
+  //   await cchessEngine.startup();
+  //   prt("Jdt cchessEngine.applyConfig()");
+  //   await cchessEngine.applyConfig();
+  //   prt("Jdt cchessEngine.applyConfig() done");
+  // }
 }
 
 class MyApp extends StatelessWidget {

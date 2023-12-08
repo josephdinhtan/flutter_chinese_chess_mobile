@@ -1,9 +1,10 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_chinese_chess_ai_mobile/src/presentation/screens/battle_page_temp/battle_page/battle_page.dart';
 import 'package:flutter_chinese_chess_ai_mobile/src/presentation/screens/battle_screens/battle_screen.dart';
 import 'package:provider/provider.dart';
+import '../screens/battle_page_temp/state_controllers/board_state.dart';
 import '../screens/settings_screen/settings_screen.dart';
 import '../screens/settings_screen/sub_settings_screen/engine_params_page.dart';
-import '../widgets/game/board_state.dart';
 
 enum GameScene {
   unknown,
@@ -22,7 +23,7 @@ class JdtRouter {
       case GameScene.battle:
         page = MultiProvider(providers: [
           ChangeNotifierProvider<BoardState>(create: (_) => BoardState()),
-        ], child: const BattleScreen());
+        ], child: const BattlePage());
         break;
 
       case GameScene.settings:

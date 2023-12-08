@@ -3,14 +3,19 @@ import 'dart:async';
 import 'profile.dart';
 
 class LocalDb {
-  LocalDb._internal();
-  static final LocalDb _instance = LocalDb._internal();
-  factory LocalDb() => _instance;
+  LocalDb._();
+  static late LocalDb? _instance;
+  factory LocalDb() {
+    if (_instance == null) {
+      _instance = LocalDb._();
+      _instance!._load(); // load for first singleton
+    }
+    return _instance!;
+  }
 
   late final Profile _profile;
-  final _dataSetChange = StreamController();
 
-  Future<void> load() async {
+  Future<void> _load() async {
     _profile = await Profile.local().load();
     _profile.backup = await Profile.shared().load();
   }
@@ -23,14 +28,7 @@ class LocalDb {
   void set(String key, dynamic value) {
     dynamic oldValue = get(key, null);
     if (value != oldValue) {
-      _dataSetChange.sink.add(key);
       _profile.set(key, value);
     }
   }
-
-  void close() {
-    _dataSetChange.close();
-  }
-
-  StreamController get dataSetChangeNotifier => _dataSetChange;
 }

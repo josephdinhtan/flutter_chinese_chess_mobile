@@ -1,3 +1,3 @@
 library local_db;
 
-export 'src/local_db.dart';
+export 'src/local_db_item.dart';

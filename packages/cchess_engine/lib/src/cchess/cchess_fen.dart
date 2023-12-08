@@ -111,7 +111,7 @@ class Fen {
     final fullFen = pos > 0 && (fen.length - pos) >= ' w - - 0 1'.length;
 
     final layout = fen.substring(0, fullFen ? pos : fen.length);
-    final pieces = loadPieces(layout);
+    final pieces = fenToPieces(layout);
     if (pieces == null) return null;
 
     final String sideToMove; // sideToMove: w/b
@@ -134,7 +134,7 @@ class Fen {
     }
   }
 
-  static List<String>? loadPieces(String layout) {
+  static List<String>? fenToPieces(String layout) {
     //
     if (layout.length < 23) return null;
 

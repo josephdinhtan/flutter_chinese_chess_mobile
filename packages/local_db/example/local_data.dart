@@ -1,28 +1,23 @@
-import 'package:local_db/local_db.dart';
-import 'local_data_item.dart';
+import 'package:local_db/src/local_db_item.dart';
 
 class LocalData {
-  void workDirectlyWithDb() {
-    LocalDb().load();
-    // get
-    String appVersion = LocalDb().get("app_version", "1.0.1");
-    print("App version: $appVersion");
+  LocalData._();
+  static final LocalData _instance = LocalData._();
+  factory LocalData() => _instance;
 
-    // set
-    LocalDb().set("app_version", "1.0.2");
+  late final LocalDbItem debugMode;
+  late final LocalDbItem acceptedPrivacyPolicy;
+  late final LocalDbItem cloudEngineEnabled;
+  late final LocalDbItem thinkingArrowEnabled;
+  late final LocalDbItem lastReviewInvite;
 
-    // save to persistent storage
-    LocalDb().save();
-
-    // listen Data set change
-    LocalDb().dataSetChangeNotifier.stream.listen((key) {
-      print("Key change: $key");
-    });
+  Future<void> load() async {
+    debugMode = LocalDbItem('debug_mode', false);
+    acceptedPrivacyPolicy = LocalDbItem('pp_accepted', false);
+    cloudEngineEnabled = LocalDbItem('cloud_engine_enabled', true);
+    thinkingArrowEnabled = LocalDbItem('thinking_arrow_enabled', true);
+    lastReviewInvite = LocalDbItem('last_review_invite', '');
   }
 
-  void workWithDataItems() {
-    var appVersion = LocalDataItem("app_version", "1.0.1");
-    print("App version: ${appVersion.value}");
-    appVersion.value = "1.0.2";
-  }
+  Future<bool> save() => debugMode.save();
 }

@@ -5,14 +5,14 @@ import 'package:path_provider/path_provider.dart';
 
 class Profile {
   //
-  static const kLocalFile = 'app-local-profile.json';
-  static const kSharedFile = 'app-default-profile.json';
+  static const _kLocalFile = 'app-local-profile.json';
+  static const _kSharedFile = 'app-default-profile.json';
 
   final String fileName;
   Profile._create(this.fileName);
 
-  static final _local = Profile._create(kLocalFile);
-  static final _shared = Profile._create(kSharedFile);
+  static final _local = Profile._create(_kLocalFile);
+  static final _shared = Profile._create(_kSharedFile);
 
   factory Profile.local() => _local;
   factory Profile.shared() => _shared;
@@ -21,7 +21,8 @@ class Profile {
   bool _loadOk = false;
   Map<String, dynamic> _values = {};
 
-  // 在当前配置中找不到配置项时，可以从此备份配置项中查找配置项
+  // When a configuration item is not found in the current configuration,
+  // you can find the configuration item from this backup configuration item.
   Profile? backup;
 
   operator [](String key) => _values[key] ?? backup?[key];
