@@ -3,8 +3,7 @@ import 'dart:io';
 
 import '../../../../utils/logging/prt.dart';
 
-class ChessDB {
-  //
+class CloudChessDB {
   static const kHost = 'www.chessdb.cn';
   static const kPath = '/chessdb.php';
 

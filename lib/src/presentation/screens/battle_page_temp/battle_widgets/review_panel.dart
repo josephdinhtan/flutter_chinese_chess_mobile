@@ -1,21 +1,19 @@
 import 'package:in_app_review/in_app_review.dart';
 
-import '../data_base/local_data.dart';
+import '../../settings_screen/local_db/user_settings_db.dart';
 
 class ReviewPanel {
-  //
   static Future<void> popRequest({bool force = false}) async {
-    //
     final InAppReview inAppReview = InAppReview.instance;
 
     DateTime? lastInvite = DateTime.tryParse(
-      LocalData().lastReviewInvite.value,
+      UserSettingsDb().lastReviewInvite,
     );
 
     if (lastInvite == null) {
       lastInvite = DateTime.now().subtract(const Duration(days: 28));
-      LocalData().lastReviewInvite.value = lastInvite.toString();
-      LocalData().save();
+      UserSettingsDb().lastReviewInvite = lastInvite.toString();
+      UserSettingsDb().save();
     }
 
     final timeOk = force ||
@@ -23,8 +21,8 @@ class ReviewPanel {
 
     if (await inAppReview.isAvailable() && timeOk) {
       await inAppReview.requestReview();
-      LocalData().lastReviewInvite.value = DateTime.now().toString();
-      LocalData().save();
+      UserSettingsDb().lastReviewInvite = DateTime.now().toString();
+      UserSettingsDb().save();
     }
   }
 }

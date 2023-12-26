@@ -10,12 +10,14 @@ dependencies:
   flutter:
     sdk: flutter
   jdt_ui:
-    # path: D:/Flutter/Flutter_projects/Flutter_Jdt_projects/jdt_ui 
-    git:
-      url: https://github.com/josephdinhtan/flutter_jdt_widgets.git
-      ref: main
+    path: D:/Flutter/Flutter_projects/Flutter_Jdt_projects/jdt_ui 
+    # git:
+    #   url: https://github.com/josephdinhtan/flutter_jdt_widgets.git
+    #   ref: main
   # cchess_engine: 
   #   path: ./packages/cchess_engine
+  local_db:
+    path: ./packages/local_db
 
   cupertino_icons: ^1.0.2
   wakelock: ^0.6.2

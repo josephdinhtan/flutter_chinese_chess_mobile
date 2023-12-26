@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'local_db.dart';
+import 'profile.dart';
 
 class LocalDbItem {
   LocalDbItem(this._key, this._defaultValue);

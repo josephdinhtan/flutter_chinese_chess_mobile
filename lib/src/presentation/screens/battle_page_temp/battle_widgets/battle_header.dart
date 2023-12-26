@@ -5,9 +5,12 @@ import '../../settings_screen/settings_screen.dart';
 import '../state_controllers/game.dart';
 
 class BattleHeader extends StatelessWidget {
-  const BattleHeader({super.key});
+  const BattleHeader(
+      {super.key, required this.title, this.showSettingsIcon = true});
+  final String title;
+  final bool showSettingsIcon;
 
-  final itemsColor = GameColors.boardBackground;
+  final itemsColor = GameColors.primary;
 
   @override
   Widget build(BuildContext context) {
@@ -36,14 +39,14 @@ class BattleHeader extends StatelessWidget {
         backButton,
         const Expanded(child: SizedBox()),
         Text(
-          "Phân tích cuộc cờ".toUpperCase(),
+          title.toUpperCase(),
           style: GameFonts.art(
             fontSize: 28,
             color: itemsColor,
           ),
         ),
         const Expanded(child: SizedBox()),
-        settingButton,
+        showSettingsIcon ? settingButton : const SizedBox(),
       ],
     );
   }

@@ -4,7 +4,7 @@ import 'profile.dart';
 
 class LocalDb {
   LocalDb._();
-  static late LocalDb? _instance;
+  static LocalDb? _instance;
   factory LocalDb() {
     if (_instance == null) {
       _instance = LocalDb._();
@@ -21,6 +21,8 @@ class LocalDb {
   }
 
   Future<bool> save() => _profile.save();
+
+  Profile get profile => _profile;
 
   dynamic get(String key, dynamic defaultValue) =>
       _profile.get(key) ?? defaultValue;

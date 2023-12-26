@@ -5,11 +5,11 @@ import 'cchess_base.dart';
 class MoveName {
   //
   static const redColNames = '九八七六五四三二一';
-  static const blackColNames = '１２３４５６７８９';
+  static const blackColNames = '123456789';
 
   //static const redDigits = '零一二三四五六七八九';
-  static const redDigits = '0 １２３４５６７８９'; // sai phai fix lai
-  static const blackDigits = '１２３４５６７８９';
+  static const redDigits = '9876543210'; // sai phai fix lai
+  static const blackDigits = '1234567890';
 
   static String translate(ChessPositionMap position, Move move) {
     //
@@ -26,7 +26,7 @@ class MoveName {
     if (move.ty == move.fy) {
       //
       //result += '平${colNames[sideIndex][move.tx]}';
-      result += 'Bình ${digits[sideIndex][move.tx]}';
+      result += 'Bình${digits[sideIndex][move.tx]}';
       //
     } else {
       //
@@ -50,7 +50,7 @@ class MoveName {
       if (specialPieces.contains(piece)) {
         targetPos = digits[sideIndex][move.tx];
       } else {
-        targetPos = digits[sideIndex][ChessRules.abs(move.ty - move.fy)];
+        targetPos = ChessRules.abs(move.ty - move.fy).toString();
       }
 
       result += '$dir$targetPos';

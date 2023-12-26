@@ -21,8 +21,8 @@ class ChessPositionMap {
   String _initBoard = '';
   String? _lastCapturedPosition;
 
-  static ChessPositionMap get startpos {
-    return Fen.positionFromFen(Fen.defaultPosition)!;
+  static ChessPositionMap get startPos {
+    return Fen.toPosition(Fen.defaultPosition)!;
   }
 
   ChessPositionMap(
@@ -32,7 +32,7 @@ class ChessPositionMap {
     _sideToMove = sideToMove;
     _recorder = recorder;
 
-    updateInitPosition();
+    _updateInitPosition();
   }
 
   ChessPositionMap.clone(ChessPositionMap other) {
@@ -41,8 +41,8 @@ class ChessPositionMap {
 
   String get initBoard => _initBoard;
 
-  void updateInitPosition() {
-    _lastCapturedPosition = Fen.positionToFen(this);
+  void _updateInitPosition() {
+    _lastCapturedPosition = Fen.fromPosition(this);
     _initBoard = Fen.positionToCrManualBoard(this);
   }
 
@@ -88,7 +88,7 @@ class ChessPositionMap {
 
     // FEN ghi lại vị trí chiến thắng mới nhất, được yêu cầu bởi công cụ UCCI
     if (captured != Piece.noPiece) {
-      _lastCapturedPosition = Fen.positionToFen(this);
+      _lastCapturedPosition = Fen.fromPosition(this);
     }
 
     return true;
@@ -108,8 +108,12 @@ class ChessPositionMap {
 
   // lùi lại nước trước
   bool regret() {
+    prt("Jdt try regret", tag: runtimeType);
     final lastMove = _recorder.removeLast();
-    if (lastMove == null) return false;
+    if (lastMove == null) {
+      prt("Jdt lastMove == null regret fail", tag: runtimeType);
+      return false;
+    }
 
     _pieces[lastMove.from] = _pieces[lastMove.to];
     _pieces[lastMove.to] = lastMove.captured;
@@ -135,11 +139,14 @@ class ChessPositionMap {
             PieceColor.opponent(tempPosition._sideToMove);
       }
 
-      _lastCapturedPosition = Fen.positionToFen(tempPosition);
+      _lastCapturedPosition = Fen.fromPosition(tempPosition);
+      prt("Jdt regret() _lastCapturedPosition: $_lastCapturedPosition",
+          tag: runtimeType);
     }
 
     result = GameResult.pending;
 
+    prt("Jdt regret() success", tag: runtimeType);
     return true;
   }
 
@@ -203,7 +210,7 @@ class ChessPositionMap {
         same(last9Moves(3), last9Moves(7));
   }
 
-  Future<bool> saveManual(GameScene scene) async {
+  Future<bool> saveManual() async {
     //
     final title = formatDate(
       DateTime.now(),
@@ -272,6 +279,8 @@ class ChessPositionMap {
     if (moves == '') return 'position fen $position';
     return 'position fen $position moves $moves';
   }
+
+  String get diePieceStr => Fen.getDiePieces(_lastCapturedPosition!);
 
   String get moveList => _recorder.buildMoveList();
 

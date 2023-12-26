@@ -10,8 +10,10 @@
         "nobestmove",
         "pikafish",
         "ponderhit",
+        "queryall",
         "regx",
         "setoption",
+        "showall",
         "ucinewgame"
     ]
 }

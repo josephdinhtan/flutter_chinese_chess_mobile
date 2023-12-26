@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 /*=hide_for_windows=*/
 // import 'package:flutter_pangle_ads/flutter_pangle_ads.dart';
-import '../data_base/local_data.dart';
+import '../../settings_screen/local_db/user_settings_db.dart';
 /*=end=*/
 
 abstract class Ad {
@@ -58,7 +58,7 @@ class CSJ implements Ad {
     //
     /*=hide_for_windows=*/
 
-    if (!LocalData().acceptedPrivacyPolicy.value) return;
+    if (!UserSettingsDb().acceptedPrivacyPolicy) return;
 
     if (Platform.isIOS) {
       // await FlutterPangleAds.requestIDFA;

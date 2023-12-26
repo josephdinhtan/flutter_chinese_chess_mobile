@@ -1,14 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_chinese_chess_ai_mobile/src/presentation/router/router.dart';
 import 'package:jdt_ui/jdt_ui.dart';
 
-class SettingsScreen extends StatelessWidget {
+import '../../router/router.dart';
+import 'local_db/user_settings_db.dart';
+import 'sub_settings_screen/language_bottom_sheet.dart';
+
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         title: const Text('Settings'),
       ),
       body: Stack(
@@ -17,13 +26,20 @@ class SettingsScreen extends StatelessWidget {
             platform: DevicePlatform.jdt,
             sections: [
               SettingsSection(
+                textTitle: 'Language',
+                tiles: <SettingsTile>[
+                  SettingsTile.navigation(
+                    title: const Text('UI Language'),
+                    value: const Text('English'),
+                    onPressed: (context) {
+                      showLanguageSelectBottomSheet(context);
+                    },
+                  ),
+                ],
+              ),
+              SettingsSection(
                 textTitle: 'Engine',
                 tiles: <SettingsTile>[
-                  SettingsTile(
-                    title: const Text("Current device time zone"),
-                    value: const Text("GMT+7"),
-                    trailing: const Text("trailing"),
-                  ),
                   SettingsTile.navigation(
                     title: const Text('Parameter'),
                     value: const Text('Configuration'),
@@ -34,9 +50,12 @@ class SettingsScreen extends StatelessWidget {
                     },
                   ),
                   SettingsTile.switchTile(
-                    onToggle: (value) {},
+                    onToggle: (value) {
+                      UserSettingsDb().thinkingArrowEnabled = value;
+                      setState(() {});
+                    },
                     title: const Text('Engine thinking arrow'),
-                    initialValue: null,
+                    initialValue: UserSettingsDb().thinkingArrowEnabled,
                   ),
                 ],
               ),
@@ -84,6 +103,10 @@ class SettingsScreen extends StatelessWidget {
                   SettingsTile.navigation(
                     title: const Text('Contact to us'),
                     onPressed: (context) {},
+                  ),
+                  SettingsTile(
+                    title: const Text("Version"),
+                    value: const Text("1.0.1"),
                   ),
                 ],
               ),

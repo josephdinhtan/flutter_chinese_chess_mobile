@@ -54,7 +54,7 @@ class BoardWidget extends StatelessWidget {
                   ),
                 ),
               ),
-              buildPiecesLayer(board, opponentHuman: opponentHuman),
+              buildPiecesLayer(context, opponentHuman: opponentHuman),
             ],
           );
         },
@@ -87,17 +87,19 @@ class BoardWidget extends StatelessWidget {
     );
   }
 
-  Widget buildPiecesLayer(BoardState board, {bool opponentHuman = false}) {
-    return PiecesLayer(
-      PiecesLayout(
-        width,
-        board.position,
-        hoverIndex: board.liftUpIndex,
-        footprintIndex: board.footprintIndex,
-        isBoardFlipped: board.isBoardFlipped,
-        //pieceAnimationValue: board.pieceAnimationValue,
-        opponentIsHuman: opponentHuman,
-      ),
-    );
+  Widget buildPiecesLayer(BuildContext context, {bool opponentHuman = false}) {
+    return Consumer<BoardState>(builder: (context, board, child) {
+      return PiecesLayer(
+        PiecesLayout(
+          width,
+          board.position,
+          hoverIndex: board.liftUpIndex,
+          footprintIndex: board.footprintIndex,
+          isBoardFlipped: board.isBoardFlipped,
+          //pieceAnimationValue: board.pieceAnimationValue,
+          opponentIsHuman: opponentHuman,
+        ),
+      );
+    });
   }
 }

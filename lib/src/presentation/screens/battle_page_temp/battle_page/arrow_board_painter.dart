@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../chess_utils/build_utils.dart';
 import '../chess_utils/ruler.dart';
-import 'pieces_layout.dart';
+import '../board/pieces_layout.dart';
 import '../cchess/cchess_base.dart';
 import '../state_controllers/game.dart';
 
-class ThinkingBoardPainter extends CustomPainter {
+class ArrowBoardPainter extends CustomPainter {
   //
   static const pathColors = [
     Color(0xAAFF7777),
@@ -28,9 +28,9 @@ class ThinkingBoardPainter extends CustomPainter {
 
   final Paint thePaint = Paint();
 
-  ThinkingBoardPainter(this.moves, this.layoutParams);
+  ArrowBoardPainter(this.moves, this.layoutParams);
 
-  int _maxArrow = 15;
+  final int _maxArrow = 15;
 
   @override
   void paint(Canvas canvas, Size size) {

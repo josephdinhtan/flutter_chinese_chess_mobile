@@ -4,13 +4,13 @@ import 'move_recorder.dart';
 
 class Fen {
   //
-  static const fenChars = 'RNBAKCPrnbakcp';
+  static const fenCharPieces = 'RNBAKCPrnbakcp';
   static const defaultLayout =
       'rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR';
   static const defaultPosition =
       'rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1';
 
-  static String positionToFen(ChessPositionMap position) {
+  static String fromPosition(ChessPositionMap position) {
     //
     var fen = '';
 
@@ -105,7 +105,7 @@ class Fen {
     return (pos < 0) ? fen : fen.substring(0, pos);
   }
 
-  static ChessPositionMap? positionFromFen(String fen) {
+  static ChessPositionMap? toPosition(String fen) {
     //
     final pos = fen.indexOf(' ');
     final fullFen = pos > 0 && (fen.length - pos) >= ' w - - 0 1'.length;
@@ -234,7 +234,24 @@ class Fen {
     return board;
   }
 
+  /// Get item is dead
+  static String getDiePieces(String currentFen) {
+    String fullChrs = defaultLayout.replaceAll(RegExp(r'[1-9/]'), '');
+    String currentChrs = layoutOfFen(currentFen)
+        .split('/')
+        .reversed
+        .join('/')
+        .replaceAll(RegExp(r'[1-9/]'), '');
+    if (fullChrs.length > currentChrs.length) {
+      currentChrs.split('').forEach((chr) {
+        fullChrs = fullChrs.replaceFirst(chr, '');
+      });
+      return fullChrs;
+    }
+    return '';
+  }
+
   static bool isFenChar(String c) {
-    return fenChars.contains(c);
+    return fenCharPieces.contains(c);
   }
 }

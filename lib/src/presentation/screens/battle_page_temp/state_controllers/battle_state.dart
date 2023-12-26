@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class PageState with ChangeNotifier {
+class BattleState with ChangeNotifier {
   //
   String _status = '...';
   String get status => _status;

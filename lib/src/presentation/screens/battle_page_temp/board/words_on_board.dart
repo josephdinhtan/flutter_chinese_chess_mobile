@@ -29,15 +29,15 @@ class WordsOnBoard extends StatelessWidget {
       }
     }
 
-    const riverTips = Row(
-      children: <Widget>[
-        Expanded(child: SizedBox()),
-        Text('楚河', style: riverTipsStyle),
-        Expanded(flex: 2, child: SizedBox()),
-        Text('汉界', style: riverTipsStyle),
-        Expanded(child: SizedBox()),
-      ],
-    );
+    // const riverTips = Row(
+    //   children: <Widget>[
+    //     Expanded(child: SizedBox()),
+    //     Text('楚河', style: riverTipsStyle),
+    //     Expanded(flex: 2, child: SizedBox()),
+    //     Text('汉界', style: riverTipsStyle),
+    //     Expanded(child: SizedBox()),
+    //   ],
+    // );
 
     return DefaultTextStyle(
       style: GameFonts.art(color: GameColors.boardTips),
@@ -45,8 +45,8 @@ class WordsOnBoard extends StatelessWidget {
         children: <Widget>[
           Row(children: topSideChildren),
           const Expanded(child: SizedBox()),
-          riverTips,
-          const Expanded(child: SizedBox()),
+          //riverTips,
+          //const Expanded(child: SizedBox()),
           Row(children: bottomSideChildren),
         ],
       ),

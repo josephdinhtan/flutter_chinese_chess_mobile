@@ -95,7 +95,7 @@ class MoveRecorder {
     final moveList = <String>[];
 
     for (var i = 0; i < _history.length; i++) {
-      moveList.add('${_history[i].name}${(i + 1) % 4 == 0 ? '\n' : ' '}');
+      moveList.add('${_history[i].name}${(i + 1) % 2 == 0 ? '\n' : ' '}');
     }
 
     return moveList.join().trim();

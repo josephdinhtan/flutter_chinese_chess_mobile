@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_chinese_chess_ai_mobile/src/presentation/screens/battle_page_temp/battle_page/battle_page.dart';
-import 'package:flutter_chinese_chess_ai_mobile/src/presentation/screens/battle_screens/battle_screen.dart';
+import 'package:flutter_chinese_chess_ai_mobile/src/presentation/screens/battle_page_temp/edit_board_page/edit_board_page.dart';
 import 'package:provider/provider.dart';
+import '../screens/battle_page_temp/battle_page/battle_page.dart';
 import '../screens/battle_page_temp/state_controllers/board_state.dart';
 import '../screens/settings_screen/settings_screen.dart';
 import '../screens/settings_screen/sub_settings_screen/engine_params_page.dart';
@@ -9,6 +9,7 @@ import '../screens/settings_screen/sub_settings_screen/engine_params_page.dart';
 enum GameScene {
   unknown,
   battle,
+  editBoard,
   settings,
   settingsEngineParameter;
 }
@@ -17,13 +18,13 @@ const _settingsScreen = SettingsScreen();
 
 class JdtRouter {
   static void navigateTo(
-      {required BuildContext context, required GameScene scene}) async {
+      {required BuildContext context,
+      required GameScene scene,
+      dynamic parameter}) async {
     Widget page;
     switch (scene) {
       case GameScene.battle:
-        page = MultiProvider(providers: [
-          ChangeNotifierProvider<BoardState>(create: (_) => BoardState()),
-        ], child: const BattlePage());
+        page = const BattlePage();
         break;
 
       case GameScene.settings:
@@ -31,7 +32,11 @@ class JdtRouter {
         break;
 
       case GameScene.settingsEngineParameter:
-        page = EngineParamsPage();
+        page = const EngineParamsPage();
+        break;
+
+      case GameScene.editBoard:
+        page = EditBoardPage();
         break;
 
       case GameScene.unknown:

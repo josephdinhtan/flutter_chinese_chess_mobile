@@ -71,7 +71,11 @@ class EngineInfo extends Response {
       r'info depth (\d+) seldepth (\d+) multipv (\d+) score (cp|mate) (-?\d+) (upperbound|lowerbound)?'
       r'nodes (\d+) nps (\d+) hashfull (\d+) tbhits (\d+) time (\d+) pv (.*)',
     );
-    final match = regx.firstMatch(line);
+    final regx2 = RegExp(
+      r'info depth (\d+) seldepth (\d+) multipv (\d+) score (cp|mate) (-?\d+) (upperbound|lowerbound)? nodes (\d+) nps (\d+) hashfull (\d+) tbhits (\d+) time (\d+) pv (.*)',
+    );
+    var match = regx.firstMatch(line);
+    match ??= regx2.firstMatch(line);
 
     if (match != null) {
       //
@@ -97,7 +101,7 @@ class EngineInfo extends Response {
     }
   }
 
-  String followingMoves(BoardState boardState) {
+  String _followingMoves(BoardState boardState) {
     //
     final position = boardState.position;
 
@@ -108,20 +112,17 @@ class EngineInfo extends Response {
     var names = <String>[];
 
     if (PikafishEngine().state == EngineState.searching) {
-      //
       for (var i = 0; i < pvs.length; i++) {
-        //
         var move = Move.fromEngineMove(pvs[i]);
         final name = MoveName.translate(tempPosition, move);
         tempPosition.move(move);
-
         names.add(name);
       }
     } else if (PikafishEngine().state == EngineState.ready) {
       //
       for (var i = 0; i < pvs.length; i++) {
         //
-        if (pvs[i] == bestmove) continue;
+        // if (pvs[i] == bestmove) continue;
 
         var move = Move.fromEngineMove(pvs[i]);
         final name = MoveName.translate(tempPosition, move);
@@ -178,11 +179,11 @@ class EngineInfo extends Response {
     if (score == null) return null;
 
     var result = ''
-        'chiều sâu ${tokens['depth']}，'
+        'Chiều sâu ${tokens['depth']}，'
         'nút ${tokens['nodes']}，'
         'thời gian ${tokens['time']}\n';
 
-    result += followingMoves(boardState);
+    result += _followingMoves(boardState);
 
     return result;
   }

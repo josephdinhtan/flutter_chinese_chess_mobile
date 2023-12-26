@@ -4,14 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:wakelock/wakelock.dart';
-
 import 'src/presentation/screens/battle_page_temp/engine/hybrid_engine.dart';
+import 'src/presentation/screens/battle_page_temp/engine/pikafish_engine.dart';
+import 'src/presentation/screens/battle_page_temp/state_controllers/battle_state.dart';
 import 'src/presentation/screens/battle_page_temp/state_controllers/board_state.dart';
-import 'src/presentation/screens/battle_page_temp/state_controllers/page_state.dart';
 import 'src/presentation/screens/main_menu_screen/main_menu_screen.dart';
+import 'src/presentation/screens/settings_screen/local_db/engine_settings_db.dart';
+import 'src/presentation/screens/settings_screen/local_db/user_settings_db.dart';
 import 'src/utils/logging/prt.dart';
 
 void main() async {
+  PikafishEngine.isEnable = false;
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const ChessAppAi());
   SystemChrome.setPreferredOrientations(
@@ -21,10 +24,11 @@ void main() async {
   if (Platform.isAndroid) {
     // SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
     //     overlays: [SystemUiOverlay.bottom]);
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
-  }
-
-  if (Platform.isIOS) {
+    //SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
+    // SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+    //     overlays: SystemUiOverlay.values);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  } else if (Platform.isIOS) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack, overlays: []);
   }
 }
@@ -45,7 +49,6 @@ class _ChessAppAiState extends State<ChessAppAi> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     Wakelock.enable();
-    //checkTestAsyncFun();
     startUpEngine();
   }
 
@@ -88,7 +91,7 @@ class _ChessAppAiState extends State<ChessAppAi> with WidgetsBindingObserver {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<BoardState>(create: (_) => BoardState()),
-        ChangeNotifierProvider<PageState>(create: (_) => PageState()),
+        ChangeNotifierProvider<BattleState>(create: (_) => BattleState()),
       ],
       child: MaterialApp(
         navigatorKey: ChessAppAi.navKey,
@@ -104,18 +107,18 @@ class _ChessAppAiState extends State<ChessAppAi> with WidgetsBindingObserver {
   }
 
   Future<void> startUpEngine() async {
+    prt("Jdt startUpEngine() start");
+    await initDataBase();
     await HybridEngine().startup();
+    prt("Jdt startUpEngine() finish");
   }
 
-  // void checkTestAsyncFun() async {
-  //   final cchessEngine = CchessEngine();
-  //   Future.delayed(const Duration(seconds: 1));
-  //   prt("Jdt cchessEngine.startup()");
-  //   await cchessEngine.startup();
-  //   prt("Jdt cchessEngine.applyConfig()");
-  //   await cchessEngine.applyConfig();
-  //   prt("Jdt cchessEngine.applyConfig() done");
-  // }
+  Future<void> initDataBase() async {
+    prt("Jdt initDataBase() start");
+    await UserSettingsDb().load();
+    await EngineConfigDb().load();
+    prt("Jdt initDataBase() finish");
+  }
 }
 
 class MyApp extends StatelessWidget {

@@ -1,8 +1,9 @@
 import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
-import '../data_base/local_data.dart';
-import '../state_controllers/game.dart';
+
+import '../../settings_screen/local_db/user_settings_db.dart';
 import '../battle_widgets/snack_bar.dart';
+import '../state_controllers/game.dart';
 import 'ad.dart';
 
 enum AdAction {
@@ -22,25 +23,23 @@ class AdActionLimits {
 
 class AdTrigger {
   //
-  static final AdTrigger battle = AdTrigger(GameScene.battle);
+  static final AdTrigger battle = AdTrigger();
   static final List<AdTrigger> triggers = [
     battle,
   ];
-
-  final GameScene scene;
 
   // int _startTimesLess = 0;
   // int _regretTimesLess = 0;
   // int _hintTimesLess = 0;
   // int _analysisTimesLess = 0;
 
-  AdTrigger(this.scene) {
+  AdTrigger() {
     resetTimesLess();
   }
 
   bool isAdTime(AdAction action) {
     //
-    if (!LocalData().acceptedPrivacyPolicy.value) return false;
+    if (!UserSettingsDb().acceptedPrivacyPolicy) return false;
     return false;
 
     // switch (action) {
@@ -65,7 +64,7 @@ class AdTrigger {
 
   requestShowRewardAd(AdAction action, BuildContext context) {
     //
-    final item = limitedItem(context, action);
+    final item = ""; //limitedItem(context, action);
 
     final message = '看条广告，可额外获得$item（每天最多 3 条广告）！';
 
@@ -95,8 +94,8 @@ class AdTrigger {
   checkAdChance(AdAction action, BuildContext context) {
     //
     // 每天三次激励视频
-    if (LocalData().showAdDate.value == today &&
-        LocalData().showAdTimes.value >= 3) return false;
+    if (UserSettingsDb().showAdDate == today &&
+        UserSettingsDb().showAdTimes >= 3) return false;
 
     if (isAdTime(action)) {
       requestShowRewardAd(action, context);
@@ -112,13 +111,13 @@ class AdTrigger {
       trigger.resetTimesLess();
     }
 
-    if (LocalData().showAdDate.value != today) {
-      LocalData().showAdDate.value = today;
-      LocalData().showAdTimes.value = 0;
+    if (UserSettingsDb().showAdDate != today) {
+      UserSettingsDb().showAdDate = today;
+      UserSettingsDb().showAdTimes = 0;
     }
 
-    LocalData().showAdTimes.value += 1;
-    LocalData().save();
+    UserSettingsDb().showAdTimes += 1;
+    UserSettingsDb().save();
 
     showSnackBar('Advertising rewards have been obtained!');
     //showSnackBar('已获取广告奖励！');
@@ -128,56 +127,56 @@ class AdTrigger {
 
   resetTimesLess() {
     //
-    switch (scene) {
-      //
-      case GameScene.battle:
-        // _startTimesLess = AdActionLimits.battleTimes;
-        // _regretTimesLess = AdActionLimits.battleRegretTimes;
-        // _hintTimesLess = AdActionLimits.battleHintTimes;
-        // _analysisTimesLess = AdActionLimits.battleAnalysisTimes;
-        break;
+    // switch () {
+    //   //
+    //   case GameScene.battle:
+    //     // _startTimesLess = AdActionLimits.battleTimes;
+    //     // _regretTimesLess = AdActionLimits.battleRegretTimes;
+    //     // _hintTimesLess = AdActionLimits.battleHintTimes;
+    //     // _analysisTimesLess = AdActionLimits.battleAnalysisTimes;
+    //     break;
 
-      default:
-        break;
-    }
+    //   default:
+    //     break;
+    // }
   }
 
-  String limitedItem(BuildContext context, AdAction action) {
-    //
-    switch (action) {
-      case AdAction.start:
-        switch (scene) {
-          case GameScene.battle:
-            return ' ${AdActionLimits.battleTimes} 次对局机会';
-          default:
-            return '';
-        }
+  // String limitedItem(BuildContext context, AdAction action) {
+  //   //
+  //   switch (action) {
+  //     case AdAction.start:
+  //       switch (scene) {
+  //         case GameScene.battle:
+  //           return ' ${AdActionLimits.battleTimes} 次对局机会';
+  //         default:
+  //           return '';
+  //       }
 
-      case AdAction.regret:
-        switch (scene) {
-          case GameScene.battle:
-            return ' ${AdActionLimits.battleRegretTimes} 次悔棋机会';
-          default:
-            return '';
-        }
+  //     case AdAction.regret:
+  //       switch (scene) {
+  //         case GameScene.battle:
+  //           return ' ${AdActionLimits.battleRegretTimes} 次悔棋机会';
+  //         default:
+  //           return '';
+  //       }
 
-      case AdAction.requestHint:
-        switch (scene) {
-          case GameScene.battle:
-            return ' ${AdActionLimits.battleHintTimes} 次提示机会';
+  //     case AdAction.requestHint:
+  //       switch (scene) {
+  //         case GameScene.battle:
+  //           return ' ${AdActionLimits.battleHintTimes} 次提示机会';
 
-          default:
-            return '';
-        }
+  //         default:
+  //           return '';
+  //       }
 
-      case AdAction.requestAnalysis:
-        switch (scene) {
-          case GameScene.battle:
-            return ' ${AdActionLimits.battleAnalysisTimes} 次分析机会';
+  //     case AdAction.requestAnalysis:
+  //       switch (scene) {
+  //         case GameScene.battle:
+  //           return ' ${AdActionLimits.battleAnalysisTimes} 次分析机会';
 
-          default:
-            return '';
-        }
-    }
-  }
+  //         default:
+  //           return '';
+  //       }
+  //   }
+  // }
 }

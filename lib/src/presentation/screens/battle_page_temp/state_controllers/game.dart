@@ -1,19 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../data_base/local_data.dart';
+import '../../settings_screen/local_db/user_settings_db.dart';
 
 // Channels
 const kChannelCommon = 'Common';
 const kChannelMainland = 'Mainland';
 const kChannelCurrent = kChannelMainland;
-
-enum GameScene {
-  unknown,
-  battle,
-  gameNotation,
-}
-
-bool isVs(GameScene scene) => true;
 
 class GameColors {
   //
@@ -76,7 +68,7 @@ class GameFonts {
     return TextStyle(
       fontSize: fontSize,
       color: color,
-      fontFamily: LocalData().uiFont.value,
+      fontFamily: UserSettingsDb().uiFont,
       height: height,
     );
   }
@@ -89,7 +81,7 @@ class GameFonts {
     return TextStyle(
       fontSize: fontSize,
       color: color,
-      fontFamily: LocalData().uiFont.value,
+      fontFamily: UserSettingsDb().uiFont,
       height: height,
     );
   }

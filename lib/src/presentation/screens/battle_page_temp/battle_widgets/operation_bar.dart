@@ -1,19 +1,22 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:jdt_ui/jdt_ui.dart';
 
 import '../chess_utils/build_utils.dart';
 import '../chess_utils/ruler.dart';
 import '../state_controllers/game.dart';
 
-class ActionItem {
+class OperatorItem {
   final String name;
   final Icon? icon;
   final VoidCallback? callback;
-  ActionItem({required this.name, this.icon, this.callback});
+  OperatorItem({required this.name, this.icon, this.callback});
 }
 
 class OperationBar extends StatefulWidget {
   //
-  final List<ActionItem> items;
+  final List<OperatorItem> items;
 
   const OperationBar({Key? key, required this.items}) : super(key: key);
 
@@ -26,16 +29,14 @@ class _OperationBarState extends State<OperationBar> {
   final keys = <GlobalKey>[];
   final GlobalKey containerKey = GlobalKey();
 
-  final buttonStyle = GameFonts.art(fontSize: 20, color: GameColors.primary);
+  final buttonStyle = GameFonts.art(fontSize: 16, color: GameColors.primary);
   final finalChildren = <Widget>[];
 
   bool finalLayout = false;
 
   showMore() {
-    //
     if (finalChildren.length == widget.items.length) return;
-
-    final itemStyle = GameFonts.uicp(fontSize: 18);
+    const itemStyle = TextStyle(fontSize: 18);
     final moreItems = widget.items.sublist(finalChildren.length);
 
     final children = <Widget>[];
@@ -50,7 +51,7 @@ class _OperationBarState extends State<OperationBar> {
             if (e.callback != null) e.callback!();
           },
         ));
-        children.add(const Divider());
+        //children.add(const Divider());
       }
     } else {
       //
@@ -64,9 +65,10 @@ class _OperationBarState extends State<OperationBar> {
             children: [
               Expanded(
                 flex: 1,
-                child: TextButton(
-                  child: Text(left.name, style: itemStyle),
-                  onPressed: () {
+                child: ListTile(
+                  leading: left.icon,
+                  title: Text(left.name, style: itemStyle),
+                  onTap: () {
                     Navigator.of(context).pop();
                     if (left.callback != null) left.callback!();
                   },
@@ -77,9 +79,10 @@ class _OperationBarState extends State<OperationBar> {
                 flex: 1,
                 child: right == null
                     ? const SizedBox()
-                    : TextButton(
-                        child: Text(right.name, style: itemStyle),
-                        onPressed: () {
+                    : ListTile(
+                        leading: right.icon,
+                        title: Text(right.name, style: itemStyle),
+                        onTap: () {
                           Navigator.of(context).pop();
                           if (right.callback != null) right.callback!();
                         },
@@ -88,23 +91,22 @@ class _OperationBarState extends State<OperationBar> {
             ],
           ),
         );
-        children.add(const Divider());
+        //children.add(const Divider());
       }
     }
 
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) => SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            const SizedBox(height: 10),
-            ...children,
-            const SizedBox(height: 56),
-          ],
-        ),
-      ),
-    );
+    showGlassModalBottomSheet(
+        context: context,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              const SizedBox(height: 10),
+              ...children,
+              const SizedBox(height: 56),
+            ],
+          ),
+        ));
   }
 
   List<Widget> attemptChildren() {
@@ -126,30 +128,35 @@ class _OperationBarState extends State<OperationBar> {
     }
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      calcWeightPosition(buttons);
+      calculateWeightPosition(buttons);
       setState(() => finalLayout = true);
     });
 
     return buttons;
   }
 
-  calcWeightPosition(List<TextButton> buttons) {
-    //
+  calculateWeightPosition(List<TextButton> buttons) {
     var left = 0.0;
 
     final containerWidth = containerKey.currentContext!.size!.width;
 
     for (var i = 0; i < buttons.length; i++) {
-      //
       if (i > 0) left = left + keys[i - 1].currentContext!.size!.width;
       if (left + keys[i].currentContext!.size!.width >= containerWidth) break;
 
       final e = widget.items[i];
 
-      // buttons 中的按钮会被 unmount，这里直接重建
+      // buttons The buttons in will be Rebuild directly here
       finalChildren.add(TextButton(
         onPressed: e.callback,
-        child: /*e.icon ?? */ Text(e.name, style: buttonStyle),
+        child: e.icon != null
+            ? Column(
+                children: [
+                  e.icon!,
+                  Text(e.name, style: buttonStyle),
+                ],
+              )
+            : Text(e.name, style: buttonStyle),
       ));
     }
   }
@@ -164,7 +171,7 @@ class _OperationBarState extends State<OperationBar> {
       ),
       //margin: EdgeInsets.symmetric(horizontal: boardPaddingH(context)),
       //padding: const EdgeInsets.symmetric(vertical: 2),
-      height: Ruler.kOperationBarHeight,
+      //height: Ruler.kOperationBarHeight,
       child: Row(
         children: [
           Expanded(

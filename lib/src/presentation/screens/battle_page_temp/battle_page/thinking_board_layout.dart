@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../../../utils/logging/prt.dart';
+import '../../settings_screen/local_db/user_settings_db.dart';
 import '../cchess/cchess_base.dart';
-import '../data_base/local_data.dart';
 import '../engine/pikafish_engine.dart';
 import '../state_controllers/board_state.dart';
-import 'pieces_layout.dart';
-import 'thinking_board_painter.dart';
+import '../board/pieces_layout.dart';
+import 'arrow_board_painter.dart';
 
 class ThinkingBoardLayout extends StatefulWidget {
   //
@@ -41,8 +41,8 @@ class _PiecesLayoutState extends State<ThinkingBoardLayout> {
       prt("Jdt bestMove.ponder != null add move pvs: $pvs");
 
       // limited arrow to 2 only
-      if (pvs.length > 2) {
-        pvs = pvs.sublist(0, 2);
+      if (pvs.length > 4) {
+        pvs = pvs.sublist(0, 4);
       }
 
       moves.addAll(pvs.map((move) => Move.fromEngineMove(move)));
@@ -53,9 +53,9 @@ class _PiecesLayoutState extends State<ThinkingBoardLayout> {
 
     return Stack(children: [
       chessPieces,
-      if (LocalData().thinkingArrowEnabled.value)
+      if (UserSettingsDb().thinkingArrowEnabled)
         CustomPaint(
-          painter: ThinkingBoardPainter(moves, widget.piecesLayout),
+          painter: ArrowBoardPainter(moves, widget.piecesLayout),
         )
     ]);
   }

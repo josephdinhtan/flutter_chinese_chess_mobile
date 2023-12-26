@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import '../../../../utils/logging/prt.dart';
+import '../../settings_screen/local_db/user_settings_db.dart';
 import '../cchess/cchess_base.dart';
 import '../cchess/cchess_rules.dart';
-import '../data_base/local_data.dart';
-import '../engine/engine.dart';
-import 'pikafish_engine.dart';
 import '../cchess/chess_position_map.dart';
+import '../engine/engine.dart';
 import 'cloud_engine.dart';
+import 'pikafish_engine.dart';
 
 class HybridEngine {
   //
@@ -24,9 +24,11 @@ class HybridEngine {
   }
 
   Future<void> startup() async {
-    prt("Jdtl engine call startup");
-    await _pikafishEngine.startup();
-    await _pikafishEngine.applyConfig();
+    prt("Jdt engine call startup");
+    if (!_pikafishEngine.isStarted) {
+      await _pikafishEngine.startup();
+      await _pikafishEngine.applyConfig();
+    }
   }
 
   applyNativeEngineConfig() async => await _pikafishEngine.applyConfig();
@@ -34,17 +36,13 @@ class HybridEngine {
   Future<void> applyConfig() async => await _pikafishEngine.applyConfig();
 
   Future<bool> go(ChessPositionMap position, EngineCallback callback) async {
-    //
-    if (LocalData().cloudEngineEnabled.value) {
-      //
+    if (UserSettingsDb().cloudEngineEnabled) {
       final result = await Future.any([
         _cloudEngine.search(position, callback),
         Future.delayed(const Duration(seconds: 4), () => false),
       ]);
-
       if (result) return true;
     }
-
     return _pikafishEngine.go(position, callback);
   }
 

@@ -115,11 +115,9 @@ packages:
   jdt_ui:
     dependency: "direct main"
     description:
-      path: "."
-      ref: main
-      resolved-ref: "57caf9eae82e7f71abb7e8f24e05c61ccd485774"
-      url: "https://github.com/josephdinhtan/flutter_jdt_widgets.git"
-    source: git
+      path: "D:/Flutter/Flutter_projects/Flutter_Jdt_projects/jdt_ui"
+      relative: false
+    source: path
     version: "0.0.1"
   js:
     dependency: transitive
@@ -137,6 +135,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  local_db:
+    dependency: "direct main"
+    description:
+      path: "packages/local_db"
+      relative: true
+    source: path
+    version: "1.0.1"
   logging:
     dependency: "direct main"
     description:

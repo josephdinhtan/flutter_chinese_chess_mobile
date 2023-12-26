@@ -6,10 +6,9 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pikafish_engine/pikafish_engine.dart';
 
 import '../../../../utils/logging/prt.dart';
+import '../../settings_screen/local_db/engine_settings_db.dart';
 import '../cchess/chess_position_map.dart';
-import '../data_base/local_data.dart';
 import 'engine.dart';
-import 'pikafish_config.dart';
 
 enum EngineState {
   free,
@@ -44,14 +43,24 @@ class PikafishEngine {
     _setupEngine();
   }
 
+  /*This for prevent Engine startup again and again Help hot reload, hot restart for developing UI */
+  static bool isEnable = true;
+
   late Pikafish _engine;
   late StreamSubscription _subscription;
 
   EngineCallback? callback;
   EngineState _state = EngineState.free;
 
+  bool _isStarted = false;
+
   Future<void> startup() async {
-    //
+    if (!isEnable) return;
+    if (_isStarted) {
+      prt("Engine is started, ignore");
+      stop();
+      return;
+    }
     while (_engine.state.value == PikafishState.starting) {
       await Future.delayed(const Duration(seconds: 1));
     }
@@ -61,24 +70,30 @@ class PikafishEngine {
     await _setupNnue();
 
     _state = EngineState.ready;
+    _isStarted = true;
   }
 
   Future<void> applyConfig() async {
-    //
-    final config = PikafishConfig(LocalData().profile);
+    prt("Jdt pikafish_engine applyConfig()");
+    if (!isEnable) return;
+    final config = EngineConfigDb();
 
-    if (!config.ponder) stopPonder();
+    if (!config.engineConfigIsPonderSupported) stopPonder();
 
-    _engine.stdin = 'setoption name Threads value ${config.threads}';
-    _engine.stdin = 'setoption name Hash value ${config.hashSize}';
-    _engine.stdin = 'setoption name Ponder value ${config.ponder}';
-    _engine.stdin = 'setoption name Skill Level value ${config.level}';
+    _engine.stdin =
+        'setoption name Threads value ${config.engineConfigThreads}';
+    _engine.stdin = 'setoption name Hash value ${config.engineConfigHashSize}';
+    _engine.stdin =
+        'setoption name Ponder value ${config.engineConfigIsPonderSupported}';
+    _engine.stdin =
+        'setoption name Skill Level value ${config.engineConfigLevel}';
 
     _engine.stdin = 'ucinewgame';
   }
 
   Future<bool> go(ChessPositionMap position, EngineCallback callback) async {
     //
+    if (!isEnable) return true;
     this.callback = callback;
 
     final pos = position.lastCapturedPosition;
@@ -87,7 +102,7 @@ class PikafishEngine {
     var uciPos = 'position fen $pos', uciGo = '';
     if (moves != '') uciPos += ' moves $moves';
 
-    var timeLimit = PikafishConfig(LocalData().profile).timeLimit;
+    var timeLimit = EngineConfigDb().engineConfigTimeLimit;
     if (timeLimit <= 90) timeLimit *= 1000;
     uciGo = 'go movetime $timeLimit';
 
@@ -103,7 +118,7 @@ class PikafishEngine {
 
   Future<bool> goPonder(
       ChessPositionMap position, EngineCallback callback, String ponder) async {
-    //
+    if (!isEnable) return true;
     this.callback = callback;
 
     final pos = position.lastCapturedPosition;
@@ -127,6 +142,7 @@ class PikafishEngine {
 
   Future<bool> goHint(
       ChessPositionMap position, EngineCallback callback) async {
+    if (!isEnable) return true;
     // actually is go but state is hinting
     final result = go(position, callback);
     _state = EngineState.hinting;
@@ -137,10 +153,11 @@ class PikafishEngine {
   Future<void> ponderhit() async {
     //
     prt("Jdt ponderhit _state = EngineState.searching");
+    if (!isEnable) return;
     _engine.stdin = 'ponderhit';
     _state = EngineState.searching;
 
-    final timeLimit = PikafishConfig(LocalData().profile).timeLimit;
+    final timeLimit = EngineConfigDb().engineConfigTimeLimit;
     await Future.delayed(
       Duration(seconds: timeLimit),
       () => _engine.stdin = 'stop',
@@ -149,6 +166,7 @@ class PikafishEngine {
 
   Future<void> stopPonder() async {
     //
+    if (!isEnable) return;
     if (_state == EngineState.pondering) {
       await stop();
     } else {
@@ -158,6 +176,7 @@ class PikafishEngine {
 
   Future<void> stop({removeCallback = true}) async {
     //
+    if (!isEnable) return;
     if (_state != EngineState.free && _state != EngineState.ready) {
       if (removeCallback) callback = null;
       _engine.stdin = 'stop';
@@ -168,18 +187,22 @@ class PikafishEngine {
   }
 
   Future<void> shutdown() async {
+    if (!isEnable) return;
     _engine.dispose();
     _subscription.cancel();
     _state = EngineState.free;
+    _isStarted = false;
   }
 
   _setupEngine() {
+    if (!isEnable) return;
     _engine = Pikafish();
     _subscriber();
   }
 
   void _subscriber() {
     //
+    if (!isEnable) return;
     _subscription = _engine.stdout.listen((line) {
       // out from engine
       prt('Jdt engine=> $line');
@@ -188,8 +211,10 @@ class PikafishEngine {
       if (line.startsWith('info')) {
         callback!(EngineResponse(EngineType.pikafish, EngineInfo.parse(line)));
       } else if (line.startsWith('bestmove')) {
-        callback!(EngineResponse(
-            EngineType.pikafish, BestMove.parse(line))); // engineCallback
+        prt('Jdt Skip callback for bestmove because we want to keep last engine Info arrows');
+        // Skip bestmove because we want to keep last engine Info arrows
+        // callback!(EngineResponse(
+        //     EngineType.pikafish, BestMove.parse(line))); // engineCallback
         _state = EngineState.ready;
       } else if (line.startsWith('nobestmove')) {
         callback!(EngineResponse(EngineType.pikafish, NoBestmove()));
@@ -200,6 +225,7 @@ class PikafishEngine {
 
   _setupNnue() async {
     //
+    if (!isEnable) return;
     final appDocDir = await getApplicationDocumentsDirectory();
     final nnueFile = File('${appDocDir.path}/pikafish0305.nnue');
 
@@ -216,7 +242,7 @@ class PikafishEngine {
   }
 
   void newGame() {
-    //
+    if (!isEnable) return;
     stop();
 
     _engine.stdin = 'ucinewgame';
@@ -224,4 +250,5 @@ class PikafishEngine {
   }
 
   EngineState get state => _state;
+  bool get isStarted => _isStarted;
 }

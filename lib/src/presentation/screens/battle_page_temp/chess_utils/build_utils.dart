@@ -1,24 +1,21 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_chinese_chess_ai_mobile/src/presentation/screens/settings_screen/settings_screen.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../utils/logging/prt.dart';
-import '../board/thinking_board_widget.dart';
+import '../state_controllers/battle_state.dart';
 import '../state_controllers/game.dart';
-import '../state_controllers/page_state.dart';
 import 'ruler.dart';
 
 const _paddingH = 10.0;
 
 double _additionPaddingH = 0;
 
-Widget createRatingScore(BuildContext context, GameScene scene,
+Widget createRatingScore(BuildContext context,
     {Function()? leftAction, Function()? rightAction}) {
   double score = 0;
   double percentage = 0.5;
 
-  final subtitle = Consumer<PageState>(
+  final subtitle = Consumer<BattleState>(
     builder: (context, pageState, child) {
       score = pageState.score.toDouble();
       percentage = 0.5 + score / 5000;
@@ -39,24 +36,17 @@ Widget createRatingScore(BuildContext context, GameScene scene,
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: LinearProgressIndicator(
-              color: Colors.red,
-              backgroundColor: Colors.black,
-              value: percentage,
-            ),
-          )
+          LinearProgressIndicator(
+            color: Colors.red,
+            backgroundColor: Colors.black,
+            value: percentage,
+          ),
         ],
       );
     },
   );
 
   return subtitle;
-  // return Container(
-  //   margin: safeArea,
-  //   child: subtitle,
-  // );
 }
 
 double boardPaddingH(BuildContext context) {
@@ -70,23 +60,6 @@ double boardPaddingH(BuildContext context) {
   }
 
   return (windowSize.width - (width - _paddingH * 2)) / 2;
-}
-
-String titleFor(BuildContext context, GameScene scene) {
-  //
-  switch (scene) {
-    //
-    case GameScene.battle:
-      return 'Man-machine exercise';
-
-    case GameScene.gameNotation:
-      return 'my game';
-
-    case GameScene.unknown:
-      return "unknown";
-  }
-
-  throw 'Scene is node define.';
 }
 
 drawText(Canvas canvas, String text, TextStyle textStyle,

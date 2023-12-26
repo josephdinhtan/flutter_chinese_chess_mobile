@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
 import 'dart:math';
 
+import 'package:flutter/material.dart';
+
+import '../../settings_screen/local_db/user_settings_db.dart';
 import '../cchess/cchess_base.dart';
-import '../data_base/local_data.dart';
 import '../state_controllers/game.dart';
 
 class PieceHandWriting extends StatelessWidget {
@@ -24,7 +25,7 @@ class PieceHandWriting extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //
-    final theme = LocalData().highContrast.value
+    final theme = UserSettingsDb().highContrast
         ? BoardTheme.highContrastTheme
         : BoardTheme.defaultTheme;
 

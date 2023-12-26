@@ -1,29 +1,11 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 
 import '../../config/colors/game_colors.dart';
 import '../../config/styles/game_fonts.dart';
 import '../../router/router.dart';
-import '../battle_page_temp/data_base/local_data.dart';
 
-class MainMenuScreen extends StatefulWidget {
+class MainMenuScreen extends StatelessWidget {
   const MainMenuScreen({super.key});
-
-  @override
-  State<MainMenuScreen> createState() => _MainMenuScreenState();
-}
-
-class _MainMenuScreenState extends State<MainMenuScreen> {
-  @override
-  void initState() {
-    initAsync();
-    super.initState();
-  }
-
-  Future<void> initAsync() async {
-    await LocalData().load();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +28,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
           const Expanded(flex: 40, child: SizedBox()),
           TextButton(
             child: Text(
-              'Phân tích cuộc cờ',
+              'Thẩm cờ',
               style: menuItemStyle,
             ),
             onPressed: () =>
@@ -55,7 +37,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
           const Expanded(child: SizedBox()),
           TextButton(
             child: Text(
-              'Luyện chơi với máy',
+              'Kỳ phổ (trung cục, tàn cục, ván đã lưu)',
               style: menuItemStyle,
             ),
             onPressed: () =>
@@ -63,12 +45,10 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
           ),
           const Expanded(child: SizedBox()),
           TextButton(
-            child: Text(
-              'Cờ thế',
-              style: menuItemStyle,
-            ),
-            onPressed: () =>
-                JdtRouter.navigateTo(context: context, scene: GameScene.battle),
+            //onPressed: () => showReadme(context),
+            onPressed: () => JdtRouter.navigateTo(
+                context: context, scene: GameScene.editBoard),
+            child: Text('Xếp cờ', style: menuItemStyle),
           ),
           const Expanded(child: SizedBox()),
           TextButton(
@@ -78,12 +58,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
             ),
             onPressed: () => JdtRouter.navigateTo(
                 context: context, scene: GameScene.settings),
-          ),
-          const Expanded(child: SizedBox()),
-          TextButton(
-            //onPressed: () => showReadme(context),
-            onPressed: () {},
-            child: Text('Release Notes', style: menuItemStyle),
           ),
           const Expanded(flex: 40, child: SizedBox()),
         ],

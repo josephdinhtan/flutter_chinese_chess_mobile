@@ -79,6 +79,7 @@ class BoardPainter extends CustomPainter {
     }
 
     // 九宫中的斜线
+    // vẽ cửu cung
     canvas.drawLine(
       Offset(left + squareWidth * 3, top),
       Offset(left + squareWidth * 5, top + squareWidth * 2),
@@ -101,13 +102,16 @@ class BoardPainter extends CustomPainter {
     );
 
     // 炮/兵架位置指示
+    // Chỉ báo vị trí súng/quân đội
     final points = [
       // 炮架位置指示
+      // Chỉ báo vị trí của pháo
       Offset(left + squareWidth, top + squareWidth * 2),
       Offset(left + squareWidth * 7, top + squareWidth * 2),
       Offset(left + squareWidth, top + squareWidth * 7),
       Offset(left + squareWidth * 7, top + squareWidth * 7),
       // 部分兵架位置指示
+      // Chỉ báo vị trí của tốt
       Offset(left + squareWidth * 2, top + squareWidth * 3),
       Offset(left + squareWidth * 4, top + squareWidth * 3),
       Offset(left + squareWidth * 6, top + squareWidth * 3),
@@ -121,6 +125,7 @@ class BoardPainter extends CustomPainter {
     }
 
     // 兵架靠边位置指示
+    // Hướng dẫn vị trí phụ của quân đồn trú
     final leftPoints = [
       Offset(left, top + squareWidth * 3),
       Offset(left, top + squareWidth * 6),

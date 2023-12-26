@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
+import '../../../../utils/logging/prt.dart';
 import '../cchess/cchess_base.dart';
 import '../cchess/cchess_fen.dart';
 import '../cchess/cchess_rules.dart';
 import '../cchess/chess_position_map.dart';
 import '../engine/engine.dart';
-import 'game.dart';
 
 class BoardState with ChangeNotifier {
   //
-  late ChessPositionMap _position;
+  late ChessPositionMap _position; // save pieces history
   late int _liftUpIndex, _footprintIndex, _activeIndex;
   //late double _pieceAnimationValue;
 
@@ -16,7 +16,7 @@ class BoardState with ChangeNotifier {
   BestMove? bestMove;
 
   BoardState() {
-    _position = ChessPositionMap.startpos;
+    _position = ChessPositionMap.startPos;
     _liftUpIndex = _footprintIndex = _activeIndex = Move.invalidIndex;
     //_pieceAnimationValue = 1;
   }
@@ -52,7 +52,7 @@ class BoardState with ChangeNotifier {
 
   load(String fen, {notify = false}) {
     //
-    final position = Fen.positionFromFen(fen);
+    final position = Fen.toPosition(fen);
     if (position == null) return false;
 
     _position = position;
@@ -100,28 +100,35 @@ class BoardState with ChangeNotifier {
     return true;
   }
 
-  regret(GameScene scene, {moves = 2}) {
+  regret({moves = 2}) {
+    prt("Jdt regret()", tag: runtimeType);
     //
     // 轮到自己走棋的时候，才能悔棋
-    if (isVs(scene) && isOpponentTurn) {
+    // Only when it's your turn to play chess can you regret it
+    if (isOpponentTurn) {
       // Audios.playTone('invalid.mp3');
-      return;
+      prt("Jdt regret() is Opponent turn, but always allow", tag: runtimeType);
+      //return;
     }
 
     var regretted = false;
 
     /// 悔棋一回合（两步），才能撤回自己上一次的动棋
-
+    /// Only by regretting one turn (two moves) can you withdraw your last move.
     for (var i = 0; i < moves; i++) {
       //
-      if (!_position.regret()) break;
+      if (!_position.regret()) {
+        prt("Jdt regret() regret fail", tag: runtimeType);
+        break;
+      }
 
       final lastMove = _position.lastMove;
 
       if (lastMove != null) {
         //
         _footprintIndex = lastMove.from;
-        _liftUpIndex = lastMove.to;
+        _liftUpIndex = Move.invalidIndex;
+        _activeIndex = lastMove.to;
         //
       } else {
         //
@@ -150,7 +157,7 @@ class BoardState with ChangeNotifier {
     bestMove = null;
   }
 
-  saveManual(GameScene scene) async => await _position.saveManual(scene);
+  saveManual() async => await _position.saveManual();
 
   buildMoveListForManual() => _position.buildMoveListForManual();
 
@@ -175,4 +182,7 @@ class BoardState with ChangeNotifier {
 
   bool get isMyTurn => _position.sideToMove == playerSide;
   bool get isOpponentTurn => _position.sideToMove == oppositeSide;
+
+  bool get isRedTurn => _position.sideToMove == PieceColor.red;
+  bool get isBlackTurn => _position.sideToMove == PieceColor.black;
 }

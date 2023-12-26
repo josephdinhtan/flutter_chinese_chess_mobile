@@ -22,9 +22,9 @@ class CloudEngine {
     //
     this.callback = callback;
 
-    final fen = Fen.positionToFen(position);
+    final fen = Fen.fromPosition(position);
 
-    final response = await ChessDB.query(fen, banMoves: banMoves);
+    final response = await CloudChessDB.query(fen, banMoves: banMoves);
     if (response == null) {
       callback(EngineResponse(EngineType.cloudLibrary, Error('Network Error')));
       return false;
@@ -47,8 +47,8 @@ class CloudEngine {
 
   Future<EngineResponse> analysis(ChessPositionMap position) async {
     //
-    final fen = Fen.positionToFen(position);
-    var response = await ChessDB.query(fen);
+    final fen = Fen.fromPosition(position);
+    var response = await CloudChessDB.query(fen);
 
     if (response == null) {
       return EngineResponse(EngineType.cloudLibrary, Error('Network error'));

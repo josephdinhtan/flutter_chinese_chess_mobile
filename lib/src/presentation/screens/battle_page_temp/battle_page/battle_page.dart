@@ -1,30 +1,30 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:jdt_ui/jdt_ui.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../utils/logging/prt.dart';
+import '../../../router/router.dart';
 import '../ad/trigger.dart';
+import '../battle_widgets/battle_header.dart';
+import '../battle_widgets/checkbox_list_tile_ex.dart';
+import '../battle_widgets/operation_bar.dart';
+import '../battle_widgets/plain_info_panel.dart';
+import '../battle_widgets/review_panel.dart';
+import '../battle_widgets/snack_bar.dart';
 import '../cchess/cchess_base.dart';
 import '../cchess/cchess_fen.dart';
 import '../cchess/move_name.dart';
 import '../chess_utils/build_utils.dart';
-import '../chess_utils/chess_board.dart';
-import '../data_base/local_data.dart';
-import '../data_base/profile.dart';
+import 'thinking_board.dart';
 import '../engine/analysis.dart';
 import '../engine/cloud_engine.dart';
 import '../engine/engine.dart';
 import '../engine/hybrid_engine.dart';
-import '../engine/pikafish_config.dart';
 import '../engine/pikafish_engine.dart';
+import '../state_controllers/battle_state.dart';
 import '../state_controllers/board_state.dart';
 import '../state_controllers/game.dart';
-import '../state_controllers/page_state.dart';
-import '../battle_widgets/checkbox_list_tile_ex.dart';
-import '../battle_widgets/operation_bar.dart';
-import '../battle_widgets/review_panel.dart';
-import '../battle_widgets/snack_bar.dart';
-import '../battle_widgets/battle_header.dart';
+import 'battle_db.dart';
 
 class BattlePage extends StatefulWidget {
   //
@@ -41,7 +41,7 @@ class BattlePageState extends State<BattlePage> {
   bool _opponentIsHuman = false;
 
   late BoardState _boardState;
-  late PageState _pageState;
+  late BattleState _pageState;
 
   @override
   void initState() {
@@ -52,44 +52,38 @@ class BattlePageState extends State<BattlePage> {
   initGame() async {
     prt("Jdt initGame");
     _boardState = Provider.of<BoardState>(context, listen: false);
-    _pageState = Provider.of<PageState>(context, listen: false);
+    _pageState = Provider.of<BattleState>(context, listen: false);
 
     //createPieceAnimation(const Duration(milliseconds: 200), this);
 
     await loadBattle();
 
-    if (_boardState.isOpponentTurn && !_opponentIsHuman) {
-      prt("Jdt initGame opponent Is Machine, trying move");
-      engineGo();
-    } else {
-      _pageState.changeStatus(BattlePage.yourTurn);
-    }
+    engineGoHint();
+    // if (_boardState.isOpponentTurn && !_opponentIsHuman) {
+    //   prt("Jdt initGame opponent Is Machine, trying move");
+    //   engineGo();
+    // } else {
+    //   _pageState.changeStatus(BattlePage.yourTurn);
+    // }
   }
 
   // 打开上一次退出时的棋谱 Open the chess record from the last time you exited
   Future<void> loadBattle() async {
-    //
-    final profile = await Profile.local().load();
+    await BattleDb().load();
+    final position = Fen.toPosition(BattleDb().initBoard)!;
 
-    final initBoard = profile['battlepage-init-board'] ?? Fen.defaultPosition;
-    final moveList = profile['battlepage-move-list'] ?? '';
-    final boardInversed = profile['battlepage-board-inversed'] ?? false;
-    _opponentIsHuman = profile['battlepage-oppo-human'] ?? false;
-
-    final position = Fen.positionFromFen(initBoard)!;
-
-    for (var i = 0; i < moveList.length; i += 4) {
+    for (var i = 0; i < BattleDb().moveList.length; i += 4) {
       final move = Move.fromCoordinate(
-        int.parse(moveList.substring(i + 0, i + 1)),
-        int.parse(moveList.substring(i + 1, i + 2)),
-        int.parse(moveList.substring(i + 2, i + 3)),
-        int.parse(moveList.substring(i + 3, i + 4)),
+        int.parse(BattleDb().moveList.substring(i + 0, i + 1)),
+        int.parse(BattleDb().moveList.substring(i + 1, i + 2)),
+        int.parse(BattleDb().moveList.substring(i + 2, i + 3)),
+        int.parse(BattleDb().moveList.substring(i + 3, i + 4)),
       );
 
       position.move(move);
     }
 
-    _boardState.flipBoard(boardInversed, notify: false);
+    _boardState.flipBoard(BattleDb().boardFlipped, notify: false);
     _boardState.setPosition(position);
   }
 
@@ -97,14 +91,11 @@ class BattlePageState extends State<BattlePage> {
     //
     final moveList = _boardState.buildMoveListForManual();
 
-    final profile = await Profile.local().load();
+    BattleDb().initBoard = Fen.defaultPosition;
+    BattleDb().moveList = moveList;
+    BattleDb().boardFlipped = _boardState.isBoardFlipped;
 
-    profile['battlepage-init-board'] = Fen.defaultPosition;
-    profile['battlepage-move-list'] = moveList;
-    profile['battlepage-board-inversed'] = _boardState.isBoardFlipped;
-    profile['battlepage-oppo-human'] = _opponentIsHuman;
-
-    return await profile.save();
+    return await BattleDb().save();
   }
 
   confirmNewGame() {
@@ -114,7 +105,7 @@ class BattlePageState extends State<BattlePage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Start a new game？', style: GameFonts.uicp()),
+        title: Text('Start a new game?', style: GameFonts.uicp()),
         content: SingleChildScrollView(
           child: Column(
             children: [
@@ -163,25 +154,36 @@ class BattlePageState extends State<BattlePage> {
       _boardState.bestMove = null;
     });
 
-    if (opponentFirst && !_opponentIsHuman) {
-      engineGo();
-    } else {
-      _pageState.changeStatus(BattlePage.yourTurn);
-    }
+    // if (opponentFirst && !_opponentIsHuman) {
+    //   engineGo();
+    // } else {
+    //   _pageState.changeStatus(BattlePage.yourTurn);
+    // }
+    engineGoHint();
 
     ReviewPanel.popRequest();
   }
 
   regret() async {
-    //
+    prt("Jdt regret() undo 1 move", tag: runtimeType);
     if (AdTrigger.battle.checkAdChance(AdAction.regret, context)) return;
 
     await _stopPonder();
 
-    _boardState.regret(GameScene.battle, moves: 2);
+    _boardState.regret(moves: 1);
   }
 
-  analysisPosition() async {
+  goToEditBoard() {
+    prt("Jdt goToEditBoard", tag: runtimeType);
+    String currentFen = "";
+    //final boardState = Provider.of<BoardState>(context);
+    prt("Jdt goToEditBoard 2", tag: runtimeType);
+    prt("Jdt goToEditBoard ${Fen.fromPosition(_boardState.position)}",
+        tag: runtimeType);
+    JdtRouter.navigateTo(context: context, scene: GameScene.editBoard);
+  }
+
+  cloudAnalysisPosition() async {
     //
     if (AdTrigger.battle.checkAdChance(AdAction.requestAnalysis, context)) {
       return;
@@ -203,16 +205,17 @@ class BattlePageState extends State<BattlePage> {
           );
         }
         if (mounted) {
-          showAnalysisItems(
+          _showAnalysisItems(
             context,
             items: items,
             callback: (index) => Navigator.of(context).pop(),
           );
         }
       } else if (result.response is Error) {
-        if (mounted)
+        if (mounted) {
           showSnackBar(
               'Server calculation has been requested, please check later!');
+        }
       } else {
         if (mounted) {
           showSnackBar('mistak: ${result.type}');
@@ -223,7 +226,7 @@ class BattlePageState extends State<BattlePage> {
     }
   }
 
-  showAnalysisItems(
+  _showAnalysisItems(
     BuildContext context, {
     required List<AnalysisItem> items,
     required Function(AnalysisItem item) callback,
@@ -246,30 +249,16 @@ class BattlePageState extends State<BattlePage> {
     children.insert(0, const SizedBox(height: 10));
     children.add(const SizedBox(height: 56));
 
-    showModalBottomSheet(
+    showGlassModalBottomSheet(
       context: context,
-      builder: (BuildContext context) => SingleChildScrollView(
-        child: Column(mainAxisSize: MainAxisSize.min, children: children),
+      child: Container(
+        padding: const EdgeInsets.only(top: 24.0),
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Column(mainAxisSize: MainAxisSize.min, children: children),
+        ),
       ),
     );
-  }
-
-  swapPosition() async {
-    prt("Jdt swapPosition");
-    if (PikafishEngine().state == EngineState.pondering) {
-      await _stopPonder();
-      await Future.delayed(const Duration(seconds: 1));
-    }
-
-    _boardState.flipBoard(!_boardState.isBoardFlipped);
-
-    if (_boardState.isOpponentTurn && !_opponentIsHuman) {
-      prt("Jdt opponent is Machine trying auto move");
-      engineGo();
-    } else {
-      prt("Jdt swapPosition _opponent is Human");
-      _pageState.changeStatus(BattlePage.yourTurn);
-    }
   }
 
   inverseBoard() async {
@@ -285,7 +274,7 @@ class BattlePageState extends State<BattlePage> {
 
   saveManual() async {
     //
-    final success = await _boardState.saveManual(GameScene.battle);
+    final success = await _boardState.saveManual();
 
     if (!mounted) return;
     showSnackBar(success ? 'Saved successfully！' : 'Save failed！');
@@ -352,24 +341,26 @@ class BattlePageState extends State<BattlePage> {
           //
           case GameResult.pending:
             //
-            final move = _boardState.position.lastMove!.asEngineMove();
+            // final move = _boardState.position.lastMove!.asEngineMove();
 
-            if (_boardState.bestMove?.opponentPonder != null &&
-                PikafishConfig(LocalData().profile).ponder &&
-                move == _boardState.bestMove?.opponentPonder) {
-              //
-              await HybridEngine().ponderhit();
-              //
-            } else {
-              //
-              await _stopPonder();
+            // if (_boardState.bestMove?.opponentPonder != null &&
+            //     EngineConfigDb().engineConfigIsPonderSupported &&
+            //     move == _boardState.bestMove?.opponentPonder) {
+            //   //
+            //   await HybridEngine().ponderhit();
+            //   //
+            // } else {
+            //   //
+            //   await _stopPonder();
 
-              if (!_opponentIsHuman) {
-                prt("Jdt onBoardTap trying moving because opponent is machine");
-                await Future.delayed(const Duration(seconds: 1));
-                await engineGo();
-              }
-            }
+            //   if (!_opponentIsHuman) {
+            //     prt("Jdt onBoardTap trying moving because opponent is machine");
+            //     await Future.delayed(const Duration(seconds: 1));
+            //     await engineGo();
+            //   }
+            // }
+            await _stopPonder();
+            engineGoHint();
             break;
           case GameResult.win:
             gotWin();
@@ -421,34 +412,6 @@ class BattlePageState extends State<BattlePage> {
       // Khong cho May tu Move
       //_boardState.move(move); // JDT broadcast to modules to move Chess Pieces
       //startPieceAnimation();
-
-      final result = HybridEngine().scanGameResult(
-        _boardState.position,
-        _boardState.playerSide,
-      );
-
-      // after move
-      switch (result) {
-        //
-        case GameResult.pending:
-          if (er.type == EngineType.cloudLibrary) {
-            // nếu cập nhật status ở đây nó sẽ hiện đè lên score
-            //_pageState.changeStatus(BattlePage.yourTurn);
-            prt("Jdt engineCallback type is EngineType.cloudLibrary");
-          } else {
-            //afterEngineMove();
-          }
-          break;
-        case GameResult.win:
-          gotWin();
-          break;
-        case GameResult.lose:
-          gotLose();
-          break;
-        case GameResult.draw:
-          gotDraw();
-          break;
-      }
     } else if (resp is NoBestmove) {
       if (PikafishEngine().state == EngineState.searching) {
         gotWin();
@@ -461,52 +424,48 @@ class BattlePageState extends State<BattlePage> {
     }
   }
 
-  afterEngineMove() async {
-    prt("Jdt afterEngineMove: ${PikafishEngine().state}");
-    //
-    if (PikafishEngine().state == EngineState.searching) {
-      //
-      if (_boardState.bestMove?.opponentPonder != null &&
-          PikafishConfig(LocalData().profile).ponder) {
-        //
-        await Future.delayed(
-          const Duration(seconds: 1),
-          () => engineGoPonder(),
-        );
-      }
+  // afterEngineMove() async {
+  //   prt("Jdt afterEngineMove: ${PikafishEngine().state}");
+  //   if (PikafishEngine().state == EngineState.searching) {
+  //     if (_boardState.bestMove?.opponentPonder != null &&
+  //         EngineConfigDb().engineConfigIsPonderSupported) {
+  //       await Future.delayed(
+  //         const Duration(seconds: 1),
+  //         () => engineGoPonder(),
+  //       );
+  //     }
 
-      if (_boardState.engineInfo != null) {
-        //
-        final score = _boardState.engineInfo?.score(
-          _boardState,
-          true,
-        );
-        if (score != null) {
-          _pageState.changeStatus('${score.$1}, ${BattlePage.yourTurn}');
-          prt("Jdt core != null");
-        } else {
-          _pageState.changeStatus(BattlePage.yourTurn);
-          prt("Jdt core == null");
-        }
-      } else {
-        _pageState.changeStatus(BattlePage.yourTurn);
-        prt("Jdt _boardState.engineInfo == null");
-      }
+  //     if (_boardState.engineInfo != null) {
+  //       //
+  //       final score = _boardState.engineInfo?.score(
+  //         _boardState,
+  //         true,
+  //       );
+  //       if (score != null) {
+  //         _pageState.changeStatus('${score.$1}, ${BattlePage.yourTurn}');
+  //         prt("Jdt core != null");
+  //       } else {
+  //         _pageState.changeStatus('Score unknown');
+  //         prt("Jdt core == null");
+  //       }
+  //     } else {
+  //       _pageState.changeStatus("...");
+  //       prt("Jdt _boardState.engineInfo == null");
+  //     }
 
-      // debug
-      if (LocalData().debugMode.value &&
-          !PikafishConfig(LocalData().profile).ponder &&
-          mounted) {
-        //
-        Future.delayed(const Duration(seconds: 1), () => engineGoHint());
-      }
-    } else {
-      if (_boardState.isOpponentTurn && !_opponentIsHuman) {
-        prt("Jdt _opponentHuman false engineGo after 1 seconds");
-        //Future.delayed(const Duration(seconds: 1), () => engineGo());
-      }
-    }
-  }
+  //     // debug
+  //     if (UserSettingsDb().debugMode &&
+  //         !EngineConfigDb().engineConfigIsPonderSupported &&
+  //         mounted) {
+  //       Future.delayed(const Duration(seconds: 1), () => engineGoHint());
+  //     }
+  //   } else {
+  //     if (_boardState.isOpponentTurn && !_opponentIsHuman) {
+  //       prt("Jdt _opponentHuman false engineGo after 1 seconds");
+  //       //Future.delayed(const Duration(seconds: 1), () => engineGo());
+  //     }
+  //   }
+  // }
 
   Future<void> engineGo() async {
     final state = PikafishEngine().state;
@@ -644,7 +603,6 @@ class BattlePageState extends State<BattlePage> {
     //
     final ratingScore = createRatingScore(
       context,
-      GameScene.battle,
       rightAction: () async {
         //
         await HybridEngine().stop();
@@ -671,22 +629,39 @@ class BattlePageState extends State<BattlePage> {
       },
     );
     final operatorBar = OperationBar(items: [
-      ActionItem(
-          name: 'New', icon: const Icon(Icons.add), callback: confirmNewGame),
-      ActionItem(
-          name: 'Back',
-          icon: const Icon(Icons.arrow_back_ios),
+      OperatorItem(
+          name: 'New',
+          icon: const Icon(Icons.crop_square_outlined),
+          callback: confirmNewGame),
+      OperatorItem(
+          name: 'Flip',
+          icon: const Icon(Icons.flip_camera_android_rounded),
+          callback: inverseBoard),
+      OperatorItem(
+          name: 'Undo',
+          icon: const Icon(Icons.arrow_back_ios_rounded),
           callback: regret),
-      ActionItem(name: 'hint', callback: engineGoHint),
-      ActionItem(name: 'Cloud library', callback: analysisPosition),
-      ActionItem(name: 'exchange situations', callback: swapPosition),
-      ActionItem(name: 'flip the board', callback: inverseBoard),
-      ActionItem(name: 'Save game record', callback: saveManual),
+      OperatorItem(
+          name: 'Go',
+          icon: const Icon(Icons.arrow_forward_ios_rounded),
+          callback: regret),
+      OperatorItem(
+          name: 'Hint',
+          icon: const Icon(Icons.saved_search_rounded),
+          callback: engineGoHint),
+      OperatorItem(
+          name: 'Cloud',
+          icon: const Icon(Icons.cloud_done_rounded),
+          callback: cloudAnalysisPosition),
+      OperatorItem(
+          name: 'Edit board',
+          icon: const Icon(Icons.edit_square),
+          callback: goToEditBoard),
+      OperatorItem(
+          name: 'Save record',
+          icon: const Icon(Icons.save),
+          callback: saveManual),
     ]);
-
-    final engineHint = Consumer<BoardState>(
-      builder: (context, __, child) => buildEngineHint(),
-    );
 
     return Scaffold(
       body: Container(
@@ -696,57 +671,15 @@ class BattlePageState extends State<BattlePage> {
         //     fit: BoxFit.cover,
         //   ),
         // ),
-        color: GameColors.darkBackground,
+        color: Colors.white,
+        // color: GameColors.darkBackground,
         child: Column(children: <Widget>[
-          const BattleHeader(),
-          ChessBoard(scene: GameScene.battle, onBoardTap: onBoardTap),
+          const BattleHeader(title: "Thẩm cờ"),
           ratingScore,
-          engineHint,
+          ThinkingBoard(onBoardTap: onBoardTap),
+          const Expanded(child: PlainInfoPanel()),
           operatorBar
         ]),
-      ),
-    );
-  }
-
-  Widget buildEngineHint() {
-    //
-    String? content;
-
-    if (_boardState.engineInfo != null) {
-      //
-      content = _boardState.engineInfo!.info(_boardState);
-
-      if (PikafishEngine().state == EngineState.pondering) {
-        content = '[ background thinking ]\n$content';
-      }
-    }
-
-    content ??= _boardState.position.moveList;
-
-    return buildInfoPanel(content);
-  }
-
-  Widget buildInfoPanel(String text) {
-    //
-    final manualStyle = GameFonts.ui(
-      fontSize: 15,
-      color: GameColors.primary,
-      height: 1.5,
-    );
-
-    return Expanded(
-      child: Container(
-        // width: double.infinity,
-        margin: const EdgeInsets.all(16),
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(
-              parent: BouncingScrollPhysics()),
-          child: Text(
-            text,
-            style: manualStyle,
-            textAlign: TextAlign.center,
-          ),
-        ),
       ),
     );
   }

@@ -1,4 +1,4 @@
-void prt(Object? object) {
+void prt(Object? object, {Object? tag}) {
   // ignore: avoid_print
-  print(object.toString());
+  print("${tag ?? ""} ${object?.toString()}");
 }

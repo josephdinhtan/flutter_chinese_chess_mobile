@@ -37,7 +37,7 @@ class ChessSkin {
   final _assetRootPath = "assets/skins";
 
   Map<String, String> redMap = {
-    "K": "rk.gif",
+    "K": "rk.png",
     "A": "ra.png",
     "B": "rb.png",
     "C": "rc.png",
