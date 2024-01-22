@@ -90,15 +90,15 @@ class MoveRecorder {
     return moves.isNotEmpty ? moves.substring(1) : '';
   }
 
-  String buildMoveList() {
+  List<String> buildMoveList() {
     //
     final moveList = <String>[];
 
     for (var i = 0; i < _history.length; i++) {
-      moveList.add('${_history[i].name}${(i + 1) % 2 == 0 ? '\n' : ' '}');
+      moveList.add(_history[i].name.toString());
     }
 
-    return moveList.join().trim();
+    return moveList;
   }
 
   String buildMoveListForManual() {

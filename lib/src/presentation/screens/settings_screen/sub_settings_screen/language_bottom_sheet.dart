@@ -21,6 +21,7 @@ _Languages? _selected = _Languages.english;
 void showLanguageSelectBottomSheet(BuildContext context) {
   showGlassModalBottomSheet<void>(
       context: context,
+      backgroundOpacity: 1.0,
       child: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
         return Container(

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:wakelock/wakelock.dart';
+
 import 'src/presentation/screens/battle_page_temp/engine/hybrid_engine.dart';
 import 'src/presentation/screens/battle_page_temp/engine/pikafish_engine.dart';
 import 'src/presentation/screens/battle_page_temp/state_controllers/battle_state.dart';
@@ -14,7 +15,7 @@ import 'src/presentation/screens/settings_screen/local_db/user_settings_db.dart'
 import 'src/utils/logging/prt.dart';
 
 void main() async {
-  PikafishEngine.isEnable = false;
+  PikafishEngine.isEnable = true;
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const ChessAppAi());
   SystemChrome.setPreferredOrientations(

@@ -2,7 +2,7 @@ import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 
 import '../../settings_screen/local_db/user_settings_db.dart';
-import '../battle_widgets/snack_bar.dart';
+import '../analysis_page_widgets/snack_bar.dart';
 import '../state_controllers/game.dart';
 import 'ad.dart';
 

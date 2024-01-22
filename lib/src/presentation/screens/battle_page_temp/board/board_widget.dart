@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../../../utils/logging/prt.dart';
 import '../chess_utils/ruler.dart';
 import '../state_controllers/board_state.dart';
-import '../state_controllers/game.dart';
-import 'pieces_layout.dart';
-import 'pieces_layer.dart';
 import 'board_painter.dart';
-import 'words_on_board.dart';
+import 'pieces_layer.dart';
+import 'pieces_layout.dart';
 
 // mặt bàn cờ
 class BoardWidget extends StatelessWidget {
@@ -15,10 +14,19 @@ class BoardWidget extends StatelessWidget {
   final double width;
   final Function(BuildContext, int)? onBoardTap;
   final bool opponentHuman;
+  final String? boardBackgroundImagePath;
+  final Color? boardBackgroundColor;
+  final Color? boardLineColor;
 
-  const BoardWidget(this.width, this.onBoardTap,
-      {Key? key, this.opponentHuman = false})
-      : super(key: key);
+  const BoardWidget(
+    this.width,
+    this.onBoardTap, {
+    Key? key,
+    this.opponentHuman = false,
+    this.boardBackgroundImagePath,
+    this.boardBackgroundColor,
+    this.boardLineColor,
+  }) : super(key: key);
 
   double get height =>
       (width - Ruler.kBoardPadding * 2) / 9 * 10 +
@@ -26,33 +34,21 @@ class BoardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //
     prt('BoardWidget build...');
 
     final boardContainer = Container(
       width: width,
       height: height,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(5),
-        color: GameColors.boardBackground,
-      ),
       child: Consumer<BoardState>(
         builder: (context, board, child) {
           return Stack(
             children: <Widget>[
-              RepaintBoundary(
-                child: CustomPaint(
-                  painter: BoardPainter(width),
-                  child: Container(
-                    margin: EdgeInsets.symmetric(
-                      vertical: Ruler.kBoardPadding,
-                      horizontal: (width - Ruler.kBoardPadding * 2) / 9 / 2 +
-                          Ruler.kBoardPadding -
-                          Ruler.kBoardDigitsTextFontSize / 2,
-                    ),
-                    child: WordsOnBoard(board.isBoardFlipped),
-                  ),
-                ),
+              BoardPainter(
+                width: width,
+                isBoardFlipped: board.isBoardFlipped,
+                boardBackgroundColor: boardBackgroundColor,
+                backgroundImagePath: boardBackgroundImagePath,
+                boardLineColor: boardLineColor,
               ),
               buildPiecesLayer(context, opponentHuman: opponentHuman),
             ],
@@ -92,9 +88,9 @@ class BoardWidget extends StatelessWidget {
       return PiecesLayer(
         PiecesLayout(
           width,
-          board.position,
-          hoverIndex: board.liftUpIndex,
-          footprintIndex: board.footprintIndex,
+          board.positionMap,
+          handOnIndex: board.liftUpIndex,
+          footprint2ndIndex: board.footprintIndex,
           isBoardFlipped: board.isBoardFlipped,
           //pieceAnimationValue: board.pieceAnimationValue,
           opponentIsHuman: opponentHuman,

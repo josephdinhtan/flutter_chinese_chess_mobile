@@ -20,95 +20,91 @@ class _SettingsScreenState extends State<SettingsScreen> {
         centerTitle: true,
         title: const Text('Settings'),
       ),
-      body: Stack(
-        children: [
-          SettingsList(
-            platform: DevicePlatform.jdt,
-            sections: [
-              SettingsSection(
-                textTitle: 'Language',
-                tiles: <SettingsTile>[
-                  SettingsTile.navigation(
-                    title: const Text('UI Language'),
-                    value: const Text('English'),
-                    onPressed: (context) {
-                      showLanguageSelectBottomSheet(context);
-                    },
-                  ),
-                ],
+      body: SettingsList(
+        platform: DevicePlatform.jdt,
+        sections: [
+          SettingsSection(
+            textTitle: 'Language',
+            tiles: <SettingsTile>[
+              SettingsTile.navigation(
+                title: const Text('UI Language'),
+                value: const Text('English'),
+                onPressed: (context) {
+                  showLanguageSelectBottomSheet(context);
+                },
               ),
-              SettingsSection(
-                textTitle: 'Engine',
-                tiles: <SettingsTile>[
-                  SettingsTile.navigation(
-                    title: const Text('Parameter'),
-                    value: const Text('Configuration'),
-                    onPressed: (context) {
-                      JdtRouter.navigateTo(
-                          context: context,
-                          scene: GameScene.settingsEngineParameter);
-                    },
-                  ),
-                  SettingsTile.switchTile(
-                    onToggle: (value) {
-                      UserSettingsDb().thinkingArrowEnabled = value;
-                      setState(() {});
-                    },
-                    title: const Text('Engine thinking arrow'),
-                    initialValue: UserSettingsDb().thinkingArrowEnabled,
-                  ),
-                ],
+            ],
+          ),
+          SettingsSection(
+            textTitle: 'Engine',
+            tiles: <SettingsTile>[
+              SettingsTile.navigation(
+                title: const Text('Parameter'),
+                value: const Text('Configuration'),
+                onPressed: (context) {
+                  JdtRouter.navigateTo(
+                      context: context,
+                      scene: GameScene.settingsEngineParameter);
+                },
               ),
-              SettingsSection(
-                textTitle: 'Sound',
-                tiles: <SettingsTile>[
-                  SettingsTile.switchTile(
-                    title: Text('Background music'),
-                    initialValue: null,
-                    onToggle: (bool value) {},
-                  ),
-                  SettingsTile.switchTile(
-                    title: Text('Sound effect'),
-                    initialValue: true,
-                    onToggle: (bool value) {},
-                  ),
-                ],
+              SettingsTile.switchTile(
+                onToggle: (value) {
+                  UserSettingsDb().thinkingArrowEnabled = value;
+                  setState(() {});
+                },
+                title: const Text('Engine thinking arrow'),
+                initialValue: UserSettingsDb().thinkingArrowEnabled,
               ),
-              SettingsSection(
-                textTitle: 'Chess board',
-                tiles: <SettingsTile>[
-                  SettingsTile.navigation(
-                    title: const Text('Board material'),
-                    value: const Text("Wooden"),
-                    onPressed: (context) {},
-                  ),
-                  SettingsTile.navigation(
-                    title: const Text('Chess piece material'),
-                    value: const Text("Wooden"),
-                    onPressed: (context) {},
-                  ),
-                ],
+            ],
+          ),
+          SettingsSection(
+            textTitle: 'Sound',
+            tiles: <SettingsTile>[
+              SettingsTile.switchTile(
+                title: Text('Background music'),
+                initialValue: null,
+                onToggle: (bool value) {},
               ),
-              SettingsSection(
-                textTitle: 'About',
-                tiles: <SettingsTile>[
-                  SettingsTile.navigation(
-                    title: const Text('More game'),
-                    onPressed: (context) {},
-                  ),
-                  SettingsTile.navigation(
-                    title: const Text('Privacy Policy'),
-                    onPressed: (context) {},
-                  ),
-                  SettingsTile.navigation(
-                    title: const Text('Contact to us'),
-                    onPressed: (context) {},
-                  ),
-                  SettingsTile(
-                    title: const Text("Version"),
-                    value: const Text("1.0.1"),
-                  ),
-                ],
+              SettingsTile.switchTile(
+                title: Text('Sound effect'),
+                initialValue: true,
+                onToggle: (bool value) {},
+              ),
+            ],
+          ),
+          SettingsSection(
+            textTitle: 'Chess board',
+            tiles: <SettingsTile>[
+              SettingsTile.navigation(
+                title: const Text('Board material'),
+                value: const Text("Wooden"),
+                onPressed: (context) {},
+              ),
+              SettingsTile.navigation(
+                title: const Text('Chess piece material'),
+                value: const Text("Wooden"),
+                onPressed: (context) {},
+              ),
+            ],
+          ),
+          SettingsSection(
+            textTitle: 'About',
+            tiles: <SettingsTile>[
+              SettingsTile.navigation(
+                title: const Text('More game'),
+                onPressed: (context) {},
+              ),
+              SettingsTile.navigation(
+                title: const Text('Privacy Policy'),
+                onPressed: (context) {},
+              ),
+              SettingsTile.navigation(
+                title: const Text('Contact to us'),
+                onPressed: (context) {},
+              ),
+              SettingsTile(
+                title: const Text("Version"),
+                value: const Text("1.0.1"),
               ),
             ],
           ),

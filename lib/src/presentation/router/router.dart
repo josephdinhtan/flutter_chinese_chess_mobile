@@ -1,8 +1,6 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_chinese_chess_ai_mobile/src/presentation/screens/battle_page_temp/edit_board_page/edit_board_page.dart';
-import 'package:provider/provider.dart';
-import '../screens/battle_page_temp/battle_page/battle_page.dart';
-import '../screens/battle_page_temp/state_controllers/board_state.dart';
+import '../screens/battle_page_temp/edit_board_page/edit_board_page.dart';
+import '../screens/battle_page_temp/analysis_page/analysis_page.dart';
 import '../screens/settings_screen/settings_screen.dart';
 import '../screens/settings_screen/sub_settings_screen/engine_params_page.dart';
 
@@ -17,14 +15,14 @@ enum GameScene {
 const _settingsScreen = SettingsScreen();
 
 class JdtRouter {
-  static void navigateTo(
+  static Future<String?> navigateTo(
       {required BuildContext context,
       required GameScene scene,
       dynamic parameter}) async {
     Widget page;
     switch (scene) {
       case GameScene.battle:
-        page = const BattlePage();
+        page = const AnalysisPage();
         break;
 
       case GameScene.settings:
@@ -36,14 +34,14 @@ class JdtRouter {
         break;
 
       case GameScene.editBoard:
-        page = EditBoardPage();
+        page = EditBoardPage(fen: parameter);
         break;
 
       case GameScene.unknown:
         throw 'Scene is not define.';
     }
 
-    await Navigator.of(context).push(
+    return await Navigator.of(context).push<String>(
       CupertinoPageRoute(builder: (context) => page),
     );
   }

@@ -103,7 +103,7 @@ class EngineInfo extends Response {
 
   String _followingMoves(BoardState boardState) {
     //
-    final position = boardState.position;
+    final position = boardState.positionMap;
 
     final bestmove = boardState.bestMove?.bestMove;
 
@@ -149,7 +149,7 @@ class EngineInfo extends Response {
 
   (String, int)? score(BoardState boardState, bool negative) {
     //
-    final position = boardState.position;
+    final position = boardState.positionMap;
     final playerSide = boardState.playerSide;
 
     var score = tokens['score'];
@@ -165,12 +165,15 @@ class EngineInfo extends Response {
           : score > 0
               ? 'Đỏ ưu'
               : 'Đen ưu';
-
-      return ('Điểm $score ($judge)', score);
+      if (score < 0) score = score * -1;
+      return ('$judge $score điểm', score);
     }
 
     // mate
-    return (score > 0 ? '$score Thắng' : '${-score} Thua', score);
+    return (
+      score > 0 ? '$score nước ĐỎ thắng' : '${-score} nước ĐEN thắng',
+      score > 0 ? 10000 : -10000
+    );
   }
 
   String? info(BoardState boardState) {
@@ -179,13 +182,38 @@ class EngineInfo extends Response {
     if (score == null) return null;
 
     var result = ''
-        'Chiều sâu ${tokens['depth']}，'
-        'nút ${tokens['nodes']}，'
+        'Chiều sâu ${tokens['depth']}, '
+        'nút ${tokens['nodes']}, '
         'thời gian ${tokens['time']}\n';
 
     result += _followingMoves(boardState);
 
     return result;
+  }
+
+  List<String> predictMoves(BoardState boardState) {
+    var score = tokens['score'];
+    if (score == null) return [""];
+
+    final position = boardState.positionMap;
+    final tempPosition = ChessPositionMap.clone(position);
+
+    var moves = <String>[];
+    prt("Jdt predictMoves state: ${PikafishEngine().state}");
+    // switch (PikafishEngine().state) {
+    //   case EngineState.searching:
+    //   case EngineState.ready:
+    //   case EngineState.pondering:
+    //   case EngineState.free:
+    //   case EngineState.hinting:
+    // }
+    for (var i = 0; i < pvs.length; i++) {
+      var move = Move.fromEngineMove(pvs[i]);
+      final name = MoveName.translate(tempPosition, move);
+      tempPosition.move(move);
+      moves.add(name);
+    }
+    return moves;
   }
 }
 

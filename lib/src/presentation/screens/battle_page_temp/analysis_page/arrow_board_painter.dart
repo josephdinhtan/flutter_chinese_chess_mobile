@@ -30,7 +30,7 @@ class ArrowBoardPainter extends CustomPainter {
 
   ArrowBoardPainter(this.moves, this.layoutParams);
 
-  final int _maxArrow = 15;
+  final int _maxArrow = 8;
 
   @override
   void paint(Canvas canvas, Size size) {

@@ -22,7 +22,7 @@ class ChessPositionMap {
   String? _lastCapturedPosition;
 
   static ChessPositionMap get startPos {
-    return Fen.toPosition(Fen.defaultPosition)!;
+    return Fen.toPosition(Fen.defaultInitFen)!;
   }
 
   ChessPositionMap(
@@ -282,7 +282,7 @@ class ChessPositionMap {
 
   String get diePieceStr => Fen.getDiePieces(_lastCapturedPosition!);
 
-  String get moveList => _recorder.buildMoveList();
+  List<String> get moveList => _recorder.buildMoveList();
 
   String buildMoveListForManual() => _recorder.buildMoveListForManual();
 
@@ -290,7 +290,10 @@ class ChessPositionMap {
 
   String pieceAt(int index) => _pieces[index];
 
-  void setPiece(int index, String piece) => _pieces[index] = piece;
+  void setPiece(int index, String piece) {
+    _pieces[index] = piece;
+    _updateInitPosition();
+  }
 
   String get sideToMove => _sideToMove;
   void turnSide() => _sideToMove = PieceColor.opponent(_sideToMove);

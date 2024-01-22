@@ -1,44 +1,47 @@
 import 'package:flutter/material.dart';
+
 import '../cchess/cchess_base.dart';
 import '../cchess/chess_position_map.dart';
-import '../chess_utils/ruler.dart';
-import 'footprint_widget.dart';
 import 'chess_skin.dart';
+import 'footprint_widget.dart';
 import 'piece_image_widget.dart';
-import 'piece_stubs.dart';
-import 'piece_hand_writing_widget.dart';
+import 'piece.dart';
+
+const _kBoardPadding = 5.0;
+const _kBoardDigitsHeight = 20.0;
 
 class PiecesLayout {
   //
   final double width;
   final ChessPositionMap position;
-  final int hoverIndex, footprintIndex, activeIndex;
+  final int handOnIndex, footprint2ndIndex, footprintIndex;
   final bool isBoardFlipped;
 
   //final double pieceAnimationValue;
   final bool opponentIsHuman;
+  final Color? handOnColor;
 
   PiecesLayout(
     this.width,
     this.position, {
     //required this.pieceAnimationValue,
     required this.isBoardFlipped,
-    this.hoverIndex = Move.invalidIndex,
+    this.handOnIndex = Move.invalidIndex,
+    this.footprint2ndIndex = Move.invalidIndex,
     this.footprintIndex = Move.invalidIndex,
-    this.activeIndex = Move.invalidIndex,
+    this.handOnColor,
     this.opponentIsHuman = false,
   });
 
-  double get gridWidth => (width - Ruler.kBoardPadding * 2) / 9 * 8;
-  double get squareWidth => (width - Ruler.kBoardPadding * 2) / 9;
+  double get gridWidth => (width - _kBoardPadding * 2) / 9 * 8;
+  double get squareWidth => (width - _kBoardPadding * 2) / 9;
   double get pieceWidth => squareWidth * 0.96;
 
   Widget buildPiecesLayout(BuildContext context) {
-    //
-    const offsetX = Ruler.kBoardPadding;
-    const offsetY = Ruler.kBoardPadding + Ruler.kBoardDigitsHeight;
+    const offsetX = _kBoardPadding;
+    const offsetY = _kBoardPadding + _kBoardDigitsHeight;
 
-    final pieces = <PieceLayoutStub>[];
+    final pieces = <PieceLayout>[];
 
     for (var rank = 0; rank < 10; rank++) {
       for (var file = 0; file < 9; file++) {
@@ -73,11 +76,11 @@ class PiecesLayout {
         // }
 
         pieces.add(
-          PieceLayoutStub(
+          PieceLayout(
             piece: piece,
             diameter: pieceWidth,
-            selected: index == hoverIndex,
-            isActive: index == activeIndex,
+            selected: index == handOnIndex,
+            isActive: index == footprintIndex,
             x: posX,
             y: posY,
             rotate: opponentIsHuman &&
@@ -88,13 +91,14 @@ class PiecesLayout {
       }
     }
 
-    final footprintRow = footprintIndex ~/ 9, blurCol = footprintIndex % 9;
+    final footprintRow = footprint2ndIndex ~/ 9,
+        blurCol = footprint2ndIndex % 9;
     final blurX = isBoardFlipped ? 8 - blurCol : blurCol;
     final blurY = isBoardFlipped ? 9 - footprintRow : footprintRow;
 
     return Stack(
       children: <Widget>[
-        if (footprintIndex != Move.invalidIndex)
+        if (footprint2ndIndex != Move.invalidIndex)
           Positioned(
             left: offsetX + blurX * squareWidth,
             top: offsetY + blurY * squareWidth,
@@ -122,7 +126,7 @@ class PiecesLayout {
                     code: piece.piece,
                     chessSkin: ChessSkin(),
                     isActive: piece.isActive,
-                    isHover: piece.selected,
+                    isHandOn: piece.selected,
                     size: squareWidth,
                   ),
                 )
@@ -141,8 +145,9 @@ class PiecesLayout {
                     code: piece.piece,
                     chessSkin: ChessSkin(),
                     isActive: piece.isActive,
-                    isHover: piece.selected,
+                    isHandOn: piece.selected,
                     size: squareWidth,
+                    handOnColor: handOnColor ?? Colors.greenAccent,
                   ),
                 ),
       ],

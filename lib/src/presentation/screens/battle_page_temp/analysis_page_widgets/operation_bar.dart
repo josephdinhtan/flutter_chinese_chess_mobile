@@ -1,42 +1,48 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:jdt_ui/jdt_ui.dart';
 
-import '../chess_utils/build_utils.dart';
-import '../chess_utils/ruler.dart';
-import '../state_controllers/game.dart';
-
 class OperatorItem {
   final String name;
-  final Icon? icon;
-  final VoidCallback? callback;
-  OperatorItem({required this.name, this.icon, this.callback});
+  final IconData? iconData;
+  final Function()? onPressed;
+  OperatorItem({required this.name, this.iconData, this.onPressed});
 }
 
 class OperationBar extends StatefulWidget {
-  //
   final List<OperatorItem> items;
+  final Color backgroundColor;
+  final Color textColor;
+  final Color iconColor;
 
-  const OperationBar({Key? key, required this.items}) : super(key: key);
+  const OperationBar({
+    Key? key,
+    required this.items,
+    this.backgroundColor = Colors.white,
+    this.textColor = Colors.grey,
+    this.iconColor = Colors.grey,
+  }) : super(key: key);
 
   @override
   State<OperationBar> createState() => _OperationBarState();
 }
 
 class _OperationBarState extends State<OperationBar> {
-  //
   final keys = <GlobalKey>[];
   final GlobalKey containerKey = GlobalKey();
 
-  final buttonStyle = GameFonts.art(fontSize: 16, color: GameColors.primary);
+  late final TextStyle buttonStyle;
   final finalChildren = <Widget>[];
 
   bool finalLayout = false;
+  @override
+  void initState() {
+    buttonStyle = TextStyle(fontSize: 16, color: widget.textColor);
+    super.initState();
+  }
 
-  showMore() {
+  void showMore() {
     if (finalChildren.length == widget.items.length) return;
-    const itemStyle = TextStyle(fontSize: 18);
+    final itemStyle = TextStyle(fontSize: 18, color: widget.textColor);
     final moreItems = widget.items.sublist(finalChildren.length);
 
     final children = <Widget>[];
@@ -44,11 +50,11 @@ class _OperationBarState extends State<OperationBar> {
     if (moreItems.length < 5) {
       for (final e in moreItems) {
         children.add(ListTile(
-          leading: e.icon,
+          leading: Icon(e.iconData, color: widget.iconColor),
           title: Text(e.name, style: itemStyle),
           onTap: () {
             Navigator.of(context).pop();
-            if (e.callback != null) e.callback!();
+            if (e.onPressed != null) e.onPressed!();
           },
         ));
         //children.add(const Divider());
@@ -66,11 +72,11 @@ class _OperationBarState extends State<OperationBar> {
               Expanded(
                 flex: 1,
                 child: ListTile(
-                  leading: left.icon,
+                  leading: Icon(left.iconData, color: widget.iconColor),
                   title: Text(left.name, style: itemStyle),
                   onTap: () {
                     Navigator.of(context).pop();
-                    if (left.callback != null) left.callback!();
+                    if (left.onPressed != null) left.onPressed!();
                   },
                 ),
               ),
@@ -80,11 +86,11 @@ class _OperationBarState extends State<OperationBar> {
                 child: right == null
                     ? const SizedBox()
                     : ListTile(
-                        leading: right.icon,
+                        leading: Icon(right.iconData, color: widget.iconColor),
                         title: Text(right.name, style: itemStyle),
                         onTap: () {
                           Navigator.of(context).pop();
-                          if (right.callback != null) right.callback!();
+                          if (right.onPressed != null) right.onPressed!();
                         },
                       ),
               ),
@@ -97,6 +103,7 @@ class _OperationBarState extends State<OperationBar> {
 
     showGlassModalBottomSheet(
         context: context,
+        backgroundOpacity: 1.0,
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -148,11 +155,11 @@ class _OperationBarState extends State<OperationBar> {
 
       // buttons The buttons in will be Rebuild directly here
       finalChildren.add(TextButton(
-        onPressed: e.callback,
-        child: e.icon != null
+        onPressed: e.onPressed,
+        child: e.iconData != null
             ? Column(
                 children: [
-                  e.icon!,
+                  Icon(e.iconData, color: widget.iconColor),
                   Text(e.name, style: buttonStyle),
                 ],
               )
@@ -167,7 +174,7 @@ class _OperationBarState extends State<OperationBar> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(5),
-        color: GameColors.boardBackground,
+        color: widget.backgroundColor,
       ),
       //margin: EdgeInsets.symmetric(horizontal: boardPaddingH(context)),
       //padding: const EdgeInsets.symmetric(vertical: 2),
@@ -181,7 +188,7 @@ class _OperationBarState extends State<OperationBar> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.more_horiz, color: GameColors.primary),
+            icon: Icon(Icons.menu_rounded, color: widget.iconColor),
             onPressed: showMore,
           ),
         ],

@@ -41,8 +41,8 @@ class _PiecesLayoutState extends State<ThinkingBoardLayout> {
       prt("Jdt bestMove.ponder != null add move pvs: $pvs");
 
       // limited arrow to 2 only
-      if (pvs.length > 4) {
-        pvs = pvs.sublist(0, 4);
+      if (pvs.length > 2) {
+        pvs = pvs.sublist(0, 2);
       }
 
       moves.addAll(pvs.map((move) => Move.fromEngineMove(move)));

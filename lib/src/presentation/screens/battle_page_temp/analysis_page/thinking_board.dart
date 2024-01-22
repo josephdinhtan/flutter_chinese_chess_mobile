@@ -11,13 +11,14 @@ import '../state_controllers/board_state.dart';
 import 'thinking_board_layout.dart';
 
 class ThinkingBoard extends StatelessWidget {
-  const ThinkingBoard({super.key, this.onBoardTap});
+  const ThinkingBoard({super.key, this.onBoardTap, this.boardBackgroundColor});
   final Function(BuildContext, int)? onBoardTap;
+  final Color? boardBackgroundColor;
 
   @override
   Widget build(BuildContext context) {
     final boardState = Provider.of<BoardState>(context);
-    prt("Jdt ${Fen.fromPosition(boardState.position)}",
+    prt("Jdt ${Fen.fromPosition(boardState.positionMap)}",
         tag: "thinking_board_page");
     // Giới hạn độ rộng của bàn cờ khi tỉ lệ màn hình nhỏ hơn 16/9
     final windowSize = MediaQuery.of(context).size;
@@ -33,6 +34,7 @@ class ThinkingBoard extends StatelessWidget {
       width, // - _paddingH * 2,
       onBoardTap,
       opponentHuman: false,
+      boardBackgroundColor: boardBackgroundColor,
     );
 
     return boardWidget;
@@ -44,8 +46,11 @@ class _ThinkingBoardWidget extends BoardWidget {
   //
   const _ThinkingBoardWidget(
       double width, Function(BuildContext, int)? onBoardTap,
-      {Key? key, required bool opponentHuman})
-      : super(width, onBoardTap, opponentHuman: opponentHuman, key: key);
+      {Key? key, required bool opponentHuman, Color? boardBackgroundColor})
+      : super(width, onBoardTap,
+            opponentHuman: opponentHuman,
+            key: key,
+            boardBackgroundColor: boardBackgroundColor);
 
   @override
   Widget buildPiecesLayer(BuildContext context, {bool opponentHuman = false}) {
@@ -54,10 +59,10 @@ class _ThinkingBoardWidget extends BoardWidget {
         boardState,
         PiecesLayout(
           width,
-          boardState.position,
-          hoverIndex: boardState.liftUpIndex,
-          footprintIndex: boardState.footprintIndex,
-          activeIndex: boardState.activeIndex,
+          boardState.positionMap,
+          handOnIndex: boardState.liftUpIndex,
+          footprint2ndIndex: boardState.footprintIndex,
+          footprintIndex: boardState.activeIndex,
           //pieceAnimationValue: board.pieceAnimationValue,
           isBoardFlipped: boardState.isBoardFlipped,
         ),

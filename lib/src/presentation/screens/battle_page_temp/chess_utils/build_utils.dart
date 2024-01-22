@@ -3,12 +3,9 @@ import 'package:provider/provider.dart';
 
 import '../../../../utils/logging/prt.dart';
 import '../state_controllers/battle_state.dart';
-import '../state_controllers/game.dart';
 import 'ruler.dart';
 
 const _paddingH = 10.0;
-
-double _additionPaddingH = 0;
 
 Widget createRatingScore(BuildContext context,
     {Function()? leftAction, Function()? rightAction}) {
@@ -23,23 +20,31 @@ Widget createRatingScore(BuildContext context,
       if (percentage > 1) percentage = 0.95;
       if (percentage < 0) percentage = 0.05;
 
-      return Column(
+      return Stack(
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              pageState.status, // score, please move
-              maxLines: 1,
-              style: GameFonts.ui(
-                fontSize: 16,
-                color: GameColors.primary,
+          SizedBox(
+            height: 30.0,
+            child: ClipRRect(
+              borderRadius: const BorderRadius.all(Radius.circular(4)),
+              child: LinearProgressIndicator(
+                color: Colors.black,
+                backgroundColor: const Color(0xFFCC423C),
+                value: percentage,
               ),
             ),
           ),
-          LinearProgressIndicator(
-            color: Colors.red,
-            backgroundColor: Colors.black,
-            value: percentage,
+          Positioned.fill(
+            child: Align(
+                alignment: Alignment.center,
+                child: Text(
+                  pageState.status, // score, please move
+                  maxLines: 1,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                )),
           ),
         ],
       );

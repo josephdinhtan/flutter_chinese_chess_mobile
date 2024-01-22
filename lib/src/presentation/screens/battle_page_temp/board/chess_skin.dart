@@ -43,7 +43,8 @@ class ChessSkin {
     "C": "rc.png",
     "N": "rn.png",
     "R": "rr.png",
-    "P": "rp.png"
+    "P": "rp.png",
+    "W": "rw.png",
   };
   Map<String, String> blackMap = {
     "k": "bk.png",
@@ -52,7 +53,8 @@ class ChessSkin {
     "c": "bc.png",
     "n": "bn.png",
     "r": "br.png",
-    "p": "bp.png"
+    "p": "bp.png",
+    "w": "bw.png",
   };
 
   late ValueNotifier<bool> readyNotifier;
@@ -93,7 +95,7 @@ class ChessSkin {
   String get boardImage => "$_assetRootPath/$folder/$board";
 
   String getChessAssetPath(String code) {
-    if ('RNBAKCP'.contains(code)) {
+    if ('RNBAKCPW'.contains(code)) {
       return _getRedChessAssetPath(code);
     } else {
       return _getBlackChessAssetPath(code);
@@ -102,7 +104,8 @@ class ChessSkin {
 
   String _getRedChessAssetPath(String code) {
     if (!redMap.containsKey(code.toUpperCase())) {
-      log('Code error: $code', name: _tag);
+      log('_getRedChessAssetPath Code error: $code', name: _tag);
+      log('_getRedChessAssetPath redMap $redMap');
       return "$_assetRootPath/$folder/$blank";
     }
     return "$_assetRootPath/$folder/${redMap[code.toUpperCase()]}";
@@ -110,7 +113,8 @@ class ChessSkin {
 
   String _getBlackChessAssetPath(String code) {
     if (!blackMap.containsKey(code.toLowerCase())) {
-      log('Code error: $code');
+      log('_getBlackChessAssetPath Code error: $code', name: _tag);
+      log('_getBlackChessAssetPath blackMap $blackMap');
       return "assets/skins/$folder/$blank";
     }
     return "assets/skins/$folder/${blackMap[code.toLowerCase()]}";

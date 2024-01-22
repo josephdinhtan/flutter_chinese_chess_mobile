@@ -7,7 +7,6 @@ import '../cchess/cchess_base.dart';
 import '../state_controllers/game.dart';
 
 class PieceHandWriting extends StatelessWidget {
-  //
   final String code;
   final bool selected;
   final double diameter, squareSize;

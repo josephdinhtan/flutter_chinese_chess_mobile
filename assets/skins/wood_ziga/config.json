@@ -14,7 +14,8 @@
     "C": "rc.png",
     "N": "rn.png",
     "R": "rr.png",
-    "P": "rp.png"
+    "P": "rp.png",
+    "W": "rw.png"
   },
   "black": {
     "k": "bk.png",
@@ -23,6 +24,7 @@
     "c": "bc.png",
     "n": "bn.png",
     "r": "br.png",
-    "p": "bp.png"
+    "p": "bp.png",
+    "w": "bw.png"
   }
 }

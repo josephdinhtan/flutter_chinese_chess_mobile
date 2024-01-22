@@ -22,8 +22,9 @@ class GameColors {
 
   static const boardBackground = Color(0xFFEBC38D);
 
-  static const darkTextPrimary = Colors.white;
+  static const darkTextPrimary = Color(0xFF461220);
   static const darkTextSecondary = Color(0x99FFFFFF);
+  static const darkIcon = Colors.greenAccent;
 
   static const boardLine = Color(0x996D000D);
   static const boardTips = Color(0x666D000D);

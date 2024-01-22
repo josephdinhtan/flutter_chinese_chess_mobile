@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-class PiecePaintStub {
+class PiecePaint {
   final String piece;
   final Offset pos;
-  PiecePaintStub({required this.piece, required this.pos});
+  PiecePaint({required this.piece, required this.pos});
 }
 
-class PieceLayoutStub {
+class PieceLayout {
   //
   final String piece;
   final double diameter;
@@ -15,7 +15,7 @@ class PieceLayoutStub {
   final double x, y;
   final bool rotate;
 
-  PieceLayoutStub({
+  PieceLayout({
     required this.piece,
     required this.diameter,
     required this.selected,

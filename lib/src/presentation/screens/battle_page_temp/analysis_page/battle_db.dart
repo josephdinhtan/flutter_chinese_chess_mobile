@@ -20,7 +20,7 @@ class BattleDb {
   set boardFlipped(bool value) => _boardFlipped.value = value;
 
   Future<void> load() async {
-    _initBoard = LocalDbItem('battlepage_init_board', Fen.defaultPosition);
+    _initBoard = LocalDbItem('battlepage_init_board', Fen.defaultInitFen);
     _moveList = LocalDbItem('battlepage_move_list', '');
     _boardFlipped = LocalDbItem('battlepage_board_flipped', false);
   }

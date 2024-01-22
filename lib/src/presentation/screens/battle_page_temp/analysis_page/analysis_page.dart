@@ -1,20 +1,23 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../../../../utils/extensions/string_extensions.dart';
 import 'package:jdt_ui/jdt_ui.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../utils/logging/prt.dart';
 import '../../../router/router.dart';
 import '../ad/trigger.dart';
-import '../battle_widgets/battle_header.dart';
-import '../battle_widgets/checkbox_list_tile_ex.dart';
-import '../battle_widgets/operation_bar.dart';
-import '../battle_widgets/plain_info_panel.dart';
-import '../battle_widgets/review_panel.dart';
-import '../battle_widgets/snack_bar.dart';
+import '../analysis_page_widgets/battle_header.dart';
+import '../analysis_page_widgets/checkbox_list_tile_ex.dart';
+import '../analysis_page_widgets/operation_bar.dart';
+import '../analysis_page_widgets/history_panel.dart';
+import '../analysis_page_widgets/review_panel.dart';
+import '../analysis_page_widgets/snack_bar.dart';
 import '../cchess/cchess_base.dart';
 import '../cchess/cchess_fen.dart';
 import '../cchess/move_name.dart';
 import '../chess_utils/build_utils.dart';
+import '../analysis_page_widgets/engine_status_bar.dart';
 import 'thinking_board.dart';
 import '../engine/analysis.dart';
 import '../engine/cloud_engine.dart';
@@ -26,17 +29,14 @@ import '../state_controllers/board_state.dart';
 import '../state_controllers/game.dart';
 import 'battle_db.dart';
 
-class BattlePage extends StatefulWidget {
-  //
+class AnalysisPage extends StatefulWidget {
   static const yourTurn = 'Please move';
-
-  const BattlePage({Key? key}) : super(key: key);
-
+  const AnalysisPage({Key? key}) : super(key: key);
   @override
-  BattlePageState createState() => BattlePageState();
+  AnalysisPageState createState() => AnalysisPageState();
 }
 
-class BattlePageState extends State<BattlePage> {
+class AnalysisPageState extends State<AnalysisPage> {
   //
   bool _opponentIsHuman = false;
 
@@ -91,7 +91,7 @@ class BattlePageState extends State<BattlePage> {
     //
     final moveList = _boardState.buildMoveListForManual();
 
-    BattleDb().initBoard = Fen.defaultPosition;
+    BattleDb().initBoard = Fen.defaultInitFen;
     BattleDb().moveList = moveList;
     BattleDb().boardFlipped = _boardState.isBoardFlipped;
 
@@ -145,7 +145,7 @@ class BattlePageState extends State<BattlePage> {
 
     _boardState.flipBoard(opponentFirst);
 
-    _boardState.load(Fen.defaultPosition, notify: true);
+    _boardState.load(Fen.defaultInitFen, notify: true);
 
     HybridEngine().newGame();
 
@@ -173,14 +173,21 @@ class BattlePageState extends State<BattlePage> {
     _boardState.regret(moves: 1);
   }
 
-  goToEditBoard() {
+  goToEditBoard(String editFen) {
     prt("Jdt goToEditBoard", tag: runtimeType);
     String currentFen = "";
     //final boardState = Provider.of<BoardState>(context);
     prt("Jdt goToEditBoard 2", tag: runtimeType);
-    prt("Jdt goToEditBoard ${Fen.fromPosition(_boardState.position)}",
+    prt("Jdt goToEditBoard ${Fen.fromPosition(_boardState.positionMap)}",
         tag: runtimeType);
-    JdtRouter.navigateTo(context: context, scene: GameScene.editBoard);
+    JdtRouter.navigateTo(
+      context: context,
+      scene: GameScene.editBoard,
+      parameter: editFen,
+    ).then((fenStr) {
+      prt("Jdt goToEditBoard result: $fenStr", tag: runtimeType);
+      _boardState.setPosition(Fen.toPosition(fenStr!)!);
+    });
   }
 
   cloudAnalysisPosition() async {
@@ -192,7 +199,7 @@ class BattlePageState extends State<BattlePage> {
     showSnackBar('Analyzing the situation...', shortDuration: true);
 
     try {
-      final result = await CloudEngine().analysis(_boardState.position);
+      final result = await CloudEngine().analysis(_boardState.positionMap);
 
       if (result.response is Analysis) {
         //
@@ -200,7 +207,7 @@ class BattlePageState extends State<BattlePage> {
 
         for (var item in items) {
           item.name = MoveName.translate(
-            _boardState.position,
+            _boardState.positionMap,
             Move.fromEngineMove(item.move),
           );
         }
@@ -238,8 +245,9 @@ class BattlePageState extends State<BattlePage> {
       children.add(
         ListTile(
           title: Text(item.name!, style: GameFonts.ui(fontSize: 18)),
-          subtitle: Text('Probability of winning: ${item.winrate}%'),
-          trailing: Text('position score: ${item.score}'),
+          //subtitle: Text('Probability of winning: ${item.winrate}%'),
+          subtitle: Text('Tỉ lệ chiến thắng: ${item.winrate}%'),
+          trailing: Text('điểm: ${item.score}'),
           onTap: () => callback(item),
         ),
       );
@@ -251,6 +259,7 @@ class BattlePageState extends State<BattlePage> {
 
     showGlassModalBottomSheet(
       context: context,
+      backgroundOpacity: 1.0,
       child: Container(
         padding: const EdgeInsets.only(top: 24.0),
         child: SingleChildScrollView(
@@ -261,7 +270,7 @@ class BattlePageState extends State<BattlePage> {
     );
   }
 
-  inverseBoard() async {
+  flipBoard() async {
     //
     await HybridEngine().newGame();
     await Future.delayed(const Duration(seconds: 1));
@@ -290,7 +299,7 @@ class BattlePageState extends State<BattlePage> {
       return;
     }
 
-    final position = _boardState.position;
+    final position = _boardState.positionMap;
 
     // 仅 Position 中的 sideToMove 指示一方能动棋
     // Only sideToMove in Position indicates that one side can move
@@ -333,7 +342,7 @@ class BattlePageState extends State<BattlePage> {
         //startPieceAnimation();
 
         final result = HybridEngine().scanGameResult(
-          _boardState.position,
+          _boardState.positionMap,
           _boardState.playerSide,
         );
 
@@ -424,49 +433,6 @@ class BattlePageState extends State<BattlePage> {
     }
   }
 
-  // afterEngineMove() async {
-  //   prt("Jdt afterEngineMove: ${PikafishEngine().state}");
-  //   if (PikafishEngine().state == EngineState.searching) {
-  //     if (_boardState.bestMove?.opponentPonder != null &&
-  //         EngineConfigDb().engineConfigIsPonderSupported) {
-  //       await Future.delayed(
-  //         const Duration(seconds: 1),
-  //         () => engineGoPonder(),
-  //       );
-  //     }
-
-  //     if (_boardState.engineInfo != null) {
-  //       //
-  //       final score = _boardState.engineInfo?.score(
-  //         _boardState,
-  //         true,
-  //       );
-  //       if (score != null) {
-  //         _pageState.changeStatus('${score.$1}, ${BattlePage.yourTurn}');
-  //         prt("Jdt core != null");
-  //       } else {
-  //         _pageState.changeStatus('Score unknown');
-  //         prt("Jdt core == null");
-  //       }
-  //     } else {
-  //       _pageState.changeStatus("...");
-  //       prt("Jdt _boardState.engineInfo == null");
-  //     }
-
-  //     // debug
-  //     if (UserSettingsDb().debugMode &&
-  //         !EngineConfigDb().engineConfigIsPonderSupported &&
-  //         mounted) {
-  //       Future.delayed(const Duration(seconds: 1), () => engineGoHint());
-  //     }
-  //   } else {
-  //     if (_boardState.isOpponentTurn && !_opponentIsHuman) {
-  //       prt("Jdt _opponentHuman false engineGo after 1 seconds");
-  //       //Future.delayed(const Duration(seconds: 1), () => engineGo());
-  //     }
-  //   }
-  // }
-
   Future<void> engineGo() async {
     final state = PikafishEngine().state;
     prt("Jdt engineGo state: $state");
@@ -474,12 +440,12 @@ class BattlePageState extends State<BattlePage> {
 
     _pageState.changeStatus('The other party is thinking...');
 
-    await HybridEngine().go(_boardState.position, engineCallback);
+    await HybridEngine().go(_boardState.positionMap, engineCallback);
   }
 
   engineGoPonder() async {
     await HybridEngine().goPonder(
-      _boardState.position,
+      _boardState.positionMap,
       engineCallback,
       _boardState.bestMove!.opponentPonder!,
     );
@@ -505,7 +471,7 @@ class BattlePageState extends State<BattlePage> {
 
     prt("Jdt engineGoHint Engine thinking...");
     _pageState.changeStatus('Engine thinking...');
-    await HybridEngine().goHint(_boardState.position, engineCallback);
+    await HybridEngine().goHint(_boardState.positionMap, engineCallback);
   }
 
   gotWin() async {
@@ -513,7 +479,7 @@ class BattlePageState extends State<BattlePage> {
     await Future.delayed(const Duration(seconds: 1));
 
     // Audios.playTone('win.mp3');
-    _boardState.position.result = GameResult.win;
+    _boardState.positionMap.result = GameResult.win;
 
     showDialog(
       context: context,
@@ -543,7 +509,7 @@ class BattlePageState extends State<BattlePage> {
     await Future.delayed(const Duration(seconds: 1));
 
     // Audios.playTone('lose.mp3');
-    _boardState.position.result = GameResult.lose;
+    _boardState.positionMap.result = GameResult.lose;
 
     showDialog(
       context: context,
@@ -573,7 +539,7 @@ class BattlePageState extends State<BattlePage> {
     await Future.delayed(const Duration(seconds: 1));
 
     // Audios.playTone('draw.mp3');
-    _boardState.position.result = GameResult.draw;
+    _boardState.positionMap.result = GameResult.draw;
 
     showDialog(
       context: context,
@@ -624,62 +590,77 @@ class BattlePageState extends State<BattlePage> {
           engineGo();
         } else {
           prt("Jdt _opponent is Human");
-          _pageState.changeStatus(BattlePage.yourTurn);
+          _pageState.changeStatus(AnalysisPage.yourTurn);
         }
       },
     );
     final operatorBar = OperationBar(items: [
       OperatorItem(
-          name: 'New',
-          icon: const Icon(Icons.crop_square_outlined),
-          callback: confirmNewGame),
-      OperatorItem(
-          name: 'Flip',
-          icon: const Icon(Icons.flip_camera_android_rounded),
-          callback: inverseBoard),
-      OperatorItem(
           name: 'Undo',
-          icon: const Icon(Icons.arrow_back_ios_rounded),
-          callback: regret),
+          iconData: Icons.arrow_back_ios_rounded,
+          onPressed: regret),
       OperatorItem(
           name: 'Go',
-          icon: const Icon(Icons.arrow_forward_ios_rounded),
-          callback: regret),
+          iconData: Icons.arrow_forward_ios_rounded,
+          onPressed: regret),
       OperatorItem(
           name: 'Hint',
-          icon: const Icon(Icons.saved_search_rounded),
-          callback: engineGoHint),
+          iconData: Icons.saved_search_rounded,
+          onPressed: engineGoHint),
+      OperatorItem(
+          name: 'Flip',
+          iconData: Icons.flip_camera_android_rounded,
+          onPressed: flipBoard),
+      OperatorItem(
+          name: 'New',
+          iconData: Icons.crop_square_outlined,
+          onPressed: confirmNewGame),
       OperatorItem(
           name: 'Cloud',
-          icon: const Icon(Icons.cloud_done_rounded),
-          callback: cloudAnalysisPosition),
+          iconData: CupertinoIcons.cloud_upload,
+          onPressed: cloudAnalysisPosition),
       OperatorItem(
-          name: 'Edit board',
-          icon: const Icon(Icons.edit_square),
-          callback: goToEditBoard),
+        name: 'Sửa hình cờ',
+        iconData: Icons.edit_note_rounded,
+        onPressed: () {
+          goToEditBoard(Fen.fromPosition(_boardState.positionMap));
+        },
+      ),
       OperatorItem(
-          name: 'Save record',
-          icon: const Icon(Icons.save),
-          callback: saveManual),
+          name: 'Lưu hình cờ',
+          iconData: Icons.shape_line_outlined,
+          onPressed: saveManual),
+      OperatorItem(
+          name: 'Lưu toàn bộ ván cờ',
+          iconData: Icons.star_outline_rounded,
+          onPressed: saveManual),
     ]);
 
     return Scaffold(
       body: Container(
+        // constraints: const BoxConstraints.expand(),
         // decoration: const BoxDecoration(
-        //   image: DecorationImage(
-        //     image: AssetImage('images/bg.jpg'),
-        //     fit: BoxFit.cover,
-        //   ),
-        // ),
-        color: Colors.white,
+        //     image: DecorationImage(
+        //         image: AssetImage("assets/images/battle_background.jpg"),
+        //         fit: BoxFit.cover)),
         // color: GameColors.darkBackground,
-        child: Column(children: <Widget>[
-          const BattleHeader(title: "Thẩm cờ"),
-          ratingScore,
-          ThinkingBoard(onBoardTap: onBoardTap),
-          const Expanded(child: PlainInfoPanel()),
-          operatorBar
-        ]),
+        //color: Color.fromRGBO(242, 242, 247, 1),
+        color: const Color(0xFFEDE8E0),
+        child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              BattleHeader(
+                title: "Phân Tích".capitalize.hardCode,
+                iconData: Icons.saved_search,
+              ),
+              const EngineStatusBar(),
+              ThinkingBoard(
+                onBoardTap: onBoardTap,
+                boardBackgroundColor: const Color(0xFFdfb87e),
+              ),
+              const Expanded(child: HistoryPanel()),
+              operatorBar
+            ]),
       ),
     );
   }

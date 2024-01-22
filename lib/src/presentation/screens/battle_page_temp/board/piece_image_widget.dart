@@ -5,8 +5,10 @@ class PieceImageWidget extends StatelessWidget {
   final String code;
   final double size;
   final bool isActive;
-  final bool isHover;
+  final bool isHandOn;
   final ChessSkin chessSkin;
+  final Color activeColor;
+  final Color handOnColor;
 
   const PieceImageWidget(
       {Key? key,
@@ -14,9 +16,10 @@ class PieceImageWidget extends StatelessWidget {
       required this.size,
       required this.chessSkin,
       required this.isActive,
-      required this.isHover})
+      required this.isHandOn,
+      this.activeColor = Colors.white,
+      this.handOnColor = Colors.white})
       : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     const angle = 1.9;
@@ -35,10 +38,10 @@ class PieceImageWidget extends StatelessWidget {
               borderRadius: BorderRadius.all(
                 Radius.circular(size * 100),
               ),
-              border: isActive && !isHover
+              border: isActive && !isHandOn
                   ? Border.all(
-                      width: size / 35,
-                      color: Colors.white.withOpacity(0.9),
+                      width: size / 25,
+                      color: activeColor.withOpacity(0.9),
                     )
                   : null,
             ),
@@ -49,31 +52,31 @@ class PieceImageWidget extends StatelessWidget {
               height: size * 0.95,
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeOutQuint,
-              transform: isHover
+              transform: isHandOn
                   ? (Matrix4.identity()
                     ..translate(0.0, 0)
                     ..scale(1.15, 1.15, 15))
                   : Matrix4.identity(),
               transformAlignment: Alignment.center,
-              decoration: (isHover)
+              decoration: (isHandOn)
                   ? BoxDecoration(
                       boxShadow: [
                         BoxShadow(
-                          color: Color.fromRGBO(0, 0, 0, 0.4),
+                          color: const Color.fromRGBO(0, 0, 0, 0.4),
                           offset: Offset(size / 6, size / 6 * angle),
                           blurRadius: 7,
                           spreadRadius: -6,
                         ),
                         BoxShadow(
-                          color: Color.fromRGBO(0, 0, 0, 0.2),
+                          color: const Color.fromRGBO(0, 0, 0, 0.2),
                           offset: Offset(size / 4, size / 4 * angle),
                           blurRadius: 10,
                           spreadRadius: -3,
                         )
                       ],
                       border: Border.all(
-                          color: Colors.white.withOpacity(0.9),
-                          width: size / 50),
+                          color: handOnColor.withOpacity(0.9),
+                          width: size / 25),
                       borderRadius: BorderRadius.all(
                         Radius.circular(size * 100),
                       ),

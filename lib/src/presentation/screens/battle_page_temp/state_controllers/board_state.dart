@@ -174,7 +174,7 @@ class BoardState with ChangeNotifier {
     notifyListeners();
   }
 
-  ChessPositionMap get position => _position;
+  ChessPositionMap get positionMap => _position;
   int get liftUpIndex => _liftUpIndex;
   int get activeIndex => _activeIndex;
   int get footprintIndex => _footprintIndex;

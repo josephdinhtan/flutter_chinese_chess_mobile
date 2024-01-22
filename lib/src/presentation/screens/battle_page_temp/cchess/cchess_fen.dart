@@ -1,3 +1,5 @@
+import 'package:flutter_chinese_chess_ai_mobile/src/utils/logging/prt.dart';
+
 import 'chess_position_map.dart';
 import 'cchess_base.dart';
 import 'move_recorder.dart';
@@ -7,9 +9,9 @@ class Fen {
   static const fenCharPieces = 'RNBAKCPrnbakcp';
   static const defaultLayout =
       'rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR';
-  static const defaultPosition =
+  static const defaultInitFen =
       'rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1';
-
+  static const emptyFen = '4k4/9/9/9/9/9/9/9/9/4K4 w - - 0 1';
   static String fromPosition(ChessPositionMap position) {
     //
     var fen = '';
@@ -183,7 +185,7 @@ class Fen {
   static String crManualBoardToFen(String initBoard) {
     //
     if (initBoard == '' || initBoard.length != 64) {
-      return Fen.defaultPosition;
+      return Fen.defaultInitFen;
     }
 
     final board = List<String>.filled(90, '');
@@ -236,12 +238,8 @@ class Fen {
 
   /// Get item is dead
   static String getDiePieces(String currentFen) {
-    String fullChrs = defaultLayout.replaceAll(RegExp(r'[1-9/]'), '');
-    String currentChrs = layoutOfFen(currentFen)
-        .split('/')
-        .reversed
-        .join('/')
-        .replaceAll(RegExp(r'[1-9/]'), '');
+    String fullChrs = defaultInitFen.replaceAll(RegExp(r'[1-9/]'), '');
+    String currentChrs = currentFen.replaceAll(RegExp(r'[1-9/]'), '');
     if (fullChrs.length > currentChrs.length) {
       currentChrs.split('').forEach((chr) {
         fullChrs = fullChrs.replaceFirst(chr, '');

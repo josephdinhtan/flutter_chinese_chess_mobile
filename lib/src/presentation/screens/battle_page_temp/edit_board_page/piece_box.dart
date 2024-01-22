@@ -1,96 +1,58 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_chinese_chess_ai_mobile/src/utils/logging/prt.dart';
 
 import '../board/chess_skin.dart';
 import '../board/piece_image_widget.dart';
 
-class PieceBox extends StatefulWidget {
+class PieceBox extends StatelessWidget {
   const PieceBox(
       {super.key,
-      required this.deadPieces,
-      required this.onAddingPieceSelected});
-  final String deadPieces;
+      required this.pieces,
+      required this.onAddingPieceSelected,
+      required this.activePiece,
+      required this.isRed});
+  final bool isRed;
+  final String pieces;
+  final String activePiece;
   final Function(String pieceStr) onAddingPieceSelected;
-
-  @override
-  State<PieceBox> createState() => _PieceBoxState();
-}
-
-class _PieceBoxState extends State<PieceBox> {
-  static const allItemChrs = 'abncrp';
+  static const allItemChrs = 'abncrpw';
   final direction = Axis.horizontal;
-  String activePiece = '';
 
   int matchCount(String chr) {
-    return RegExp(chr).allMatches(widget.deadPieces).length;
+    if (chr.toUpperCase() == 'W') {
+      prt('Jdt pieces: $pieces');
+      return 30 - pieces.length;
+    }
+    return RegExp(chr).allMatches(pieces).length;
   }
 
-  void setActive(String chr) {
-    setState(() {
-      activePiece = chr;
-    });
-    widget.onAddingPieceSelected(chr);
-  }
-
-  @override
-  void initState() {
-    super.initState();
+  bool isPieceHandOn(String chr) {
+    if (chr.toUpperCase() == 'W' &&
+        activePiece.toUpperCase() == chr.toUpperCase()) {
+      return true;
+    }
+    return activePiece == chr;
   }
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Wrap(
-                  alignment: WrapAlignment.spaceEvenly,
-                  children: allItemChrs
-                      .split('')
-                      .map<Widget>(
-                        (String chr) => _ItemWidget(
-                          chr: chr,
-                          count: matchCount(chr),
-                          isActive: activePiece == chr,
-                          onSelected: (pieceStr) {
-                            setActive(pieceStr);
-                          },
-                        ),
-                      )
-                      .toList(),
-                ),
-                const SizedBox(width: 16.0, height: 16.0),
-                Wrap(
-                  alignment: WrapAlignment.spaceEvenly,
-                  children: allItemChrs
-                      .toUpperCase()
-                      .split('')
-                      .map<Widget>(
-                        (String chr) => _ItemWidget(
-                          chr: chr,
-                          count: matchCount(chr),
-                          isActive: activePiece == chr,
-                          onSelected: (pieceStr) {
-                            setActive(pieceStr);
-                          },
-                        ),
-                      )
-                      .toList(),
-                ),
-              ],
+    String _allItemChrs = allItemChrs;
+    if (isRed) _allItemChrs = allItemChrs.toUpperCase();
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: _allItemChrs
+          .split('')
+          .map<Widget>(
+            (String chr) => _ItemWidget(
+              chr: chr,
+              count: matchCount(chr),
+              isActive: isPieceHandOn(chr),
+              onSelected: (pieceStr) {
+                onAddingPieceSelected(pieceStr);
+              },
             ),
-          ),
-          _SideToMove(onSideMoveSelected: (isRedMove) {}, isRedFirstMove: true),
-          const SizedBox(width: 8.0),
-        ],
-      ),
+          )
+          .toList(),
     );
   }
 }
@@ -106,16 +68,19 @@ class _ItemWidget extends StatelessWidget {
     Key? key,
     required this.chr,
     required this.count,
-    this.isActive = false,
+    required this.isActive,
     required this.onSelected,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    //prt("Jdt chr: $chr, isActive: $isActive", tag: runtimeType);
     return GestureDetector(
       onTap: () {
         if (count > 0) {
           onSelected(chr);
+        } else {
+          onSelected(' ');
         }
       },
       child: SizedBox(
@@ -137,12 +102,13 @@ class _ItemWidget extends StatelessWidget {
                 code: chr,
                 chessSkin: ChessSkin(),
                 isActive: false,
-                isHover: false,
+                isHandOn: isActive,
                 size: pieceSize,
+                handOnColor: Colors.greenAccent,
               ),
             ),
             Align(
-              alignment: Alignment(1.3, -1.8),
+              alignment: const Alignment(1.3, -1.8),
               child: Container(
                 width: pieceSize / 2,
                 height: pieceSize / 2,
@@ -165,58 +131,6 @@ class _ItemWidget extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _SideToMove extends StatefulWidget {
-  const _SideToMove(
-      {super.key,
-      required this.onSideMoveSelected,
-      this.isRedFirstMove = true});
-  final bool isRedFirstMove;
-  final Function(bool isRedMove) onSideMoveSelected;
-  @override
-  State<_SideToMove> createState() => _SideToMoveState();
-}
-
-class _SideToMoveState extends State<_SideToMove> {
-  void setSideToMove(bool isRed) {
-    widget.onSideMoveSelected(isRed);
-    setState(() {
-      isRedMove = isRed;
-    });
-  }
-
-  bool isRedMove = true;
-  @override
-  void initState() {
-    isRedMove = widget.isRedFirstMove;
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor:
-                !isRedMove ? Colors.blueGrey[900] : Colors.transparent,
-            padding: EdgeInsets.zero,
-          ),
-          onPressed: () => setSideToMove(false),
-          child: const Text("Đen tiên", style: TextStyle(color: Colors.white)),
-        ),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: isRedMove ? Colors.red : Colors.transparent,
-            padding: EdgeInsets.zero,
-          ),
-          onPressed: () => setSideToMove(true),
-          child: const Text("Đỏ tiên", style: TextStyle(color: Colors.white)),
-        ),
-      ],
     );
   }
 }

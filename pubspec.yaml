@@ -49,6 +49,7 @@ flutter:
       fonts:
         - asset: fonts/hanyixiaoli.ttf
   assets:
+    - assets/images/
     - assets/skins/wood_light/
     - assets/skins/wood_polish/
     - assets/skins/wood_ziga/
