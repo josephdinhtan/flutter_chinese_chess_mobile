@@ -1,58 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../../../../utils/logging/prt.dart';
-import '../state_controllers/battle_state.dart';
 import 'ruler.dart';
 
 const _paddingH = 10.0;
-
-Widget createRatingScore(BuildContext context,
-    {Function()? leftAction, Function()? rightAction}) {
-  double score = 0;
-  double percentage = 0.5;
-
-  final subtitle = Consumer<BattleState>(
-    builder: (context, pageState, child) {
-      score = pageState.score.toDouble();
-      percentage = 0.5 + score / 5000;
-      prt("Jdt score update to: $score, percentage: $percentage");
-      if (percentage > 1) percentage = 0.95;
-      if (percentage < 0) percentage = 0.05;
-
-      return Stack(
-        children: [
-          SizedBox(
-            height: 30.0,
-            child: ClipRRect(
-              borderRadius: const BorderRadius.all(Radius.circular(4)),
-              child: LinearProgressIndicator(
-                color: Colors.black,
-                backgroundColor: const Color(0xFFCC423C),
-                value: percentage,
-              ),
-            ),
-          ),
-          Positioned.fill(
-            child: Align(
-                alignment: Alignment.center,
-                child: Text(
-                  pageState.status, // score, please move
-                  maxLines: 1,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                )),
-          ),
-        ],
-      );
-    },
-  );
-
-  return subtitle;
-}
 
 double boardPaddingH(BuildContext context) {
   //

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chinese_chess_ai_mobile/src/presentation/screens/battle_page_temp/cchess/chess_position_map.dart';
 
 import '../../../../utils/logging/prt.dart';
-import '../analysis_page_widgets/battle_header.dart';
+import '../analysis_page_widgets/page_header.dart';
 import '../analysis_page_widgets/operation_bar.dart';
 import '../cchess/cchess_fen.dart';
 import 'edit_board.dart';
@@ -101,7 +101,7 @@ class _EditBoardPageState extends State<EditBoardPage> {
   Widget build(BuildContext context) {
     final deadPieces = positionMap.diePieceStr;
     final operatorBar =
-        OperationBar(backgroundColor: Colors.transparent, items: [
+        OperationBar(backgroundColor: Colors.white.withOpacity(0.1), items: [
       OperatorItem(
         name: 'Xoá bàn',
         iconData: CupertinoIcons.rectangle_expand_vertical,
@@ -114,8 +114,8 @@ class _EditBoardPageState extends State<EditBoardPage> {
         onPressed: fillAllPieces,
       ),
       OperatorItem(
-        name: 'Thẩm',
-        iconData: CupertinoIcons.search,
+        name: 'Phân tích',
+        iconData: CupertinoIcons.wand_stars_inverse,
         onPressed: () {
           showFirstMoveSelectionBottomSheet(
             context,
@@ -150,43 +150,59 @@ class _EditBoardPageState extends State<EditBoardPage> {
         onPressed: () {},
       ),
     ]);
-    return Scaffold(
-      body: Column(
-        children: [
-          const BattleHeader(title: "Xếp cờ"),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                PieceBox(
-                  isRed: false,
-                  pieces: deadPieces,
-                  activePiece: deadHandOnPiece,
-                  onAddingPieceSelected: deadPieceSelected,
+    return Container(
+      constraints: const BoxConstraints.expand(),
+      decoration: const BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage("assets/images/main_menu_background.jpg"),
+          fit: BoxFit.cover,
+        ),
+      ),
+      child: SafeArea(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Column(
+            children: [
+              const PageHeader(
+                title: "Xếp cờ",
+                titleColor: Colors.white,
+                svgIconPath: "assets/images/aim.svg",
+              ),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    PieceBox(
+                      isRed: false,
+                      pieces: deadPieces,
+                      activePiece: deadHandOnPiece,
+                      onAddingPieceSelected: deadPieceSelected,
+                    ),
+                    const SizedBox(height: 8.0),
+                    EditBoard(
+                      onBoardTap: onBoardTap,
+                      positionMap: positionMap,
+                      isFlipped: false, // TODO: need update later
+                      activeIndex: -1,
+                      onHandIndex: onHandIndex,
+                      boardBackgroundColor: const Color(0xFFdfb87e),
+                      // backgroundImagePath:
+                      //     "assets/images/board_wood_background.jpg",
+                    ),
+                    const SizedBox(height: 12.0),
+                    PieceBox(
+                      isRed: true,
+                      pieces: deadPieces,
+                      activePiece: deadHandOnPiece,
+                      onAddingPieceSelected: deadPieceSelected,
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8.0),
-                EditBoard(
-                  onBoardTap: onBoardTap,
-                  positionMap: positionMap,
-                  isFlipped: false, // TODO: need update later
-                  activeIndex: -1,
-                  onHandIndex: onHandIndex,
-                  boardBackgroundColor: const Color(0xFFdfb87e),
-                  // backgroundImagePath:
-                  //     "assets/images/board_wood_background.jpg",
-                ),
-                const SizedBox(height: 12.0),
-                PieceBox(
-                  isRed: true,
-                  pieces: deadPieces,
-                  activePiece: deadHandOnPiece,
-                  onAddingPieceSelected: deadPieceSelected,
-                ),
-              ],
-            ),
+              ),
+              operatorBar,
+            ],
           ),
-          operatorBar,
-        ],
+        ),
       ),
     );
   }

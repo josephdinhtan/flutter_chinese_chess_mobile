@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 class BattleState with ChangeNotifier {
   //
   String _status = '...';
+  bool _isMate = false;
+  bool get isMate => _isMate;
   String get status => _status;
 
   int _score = 0;
@@ -21,8 +23,8 @@ class BattleState with ChangeNotifier {
   double _gameTimeSelf = 0;
   double get gameTimeSelf => _gameTimeSelf;
 
-  changeStatus(String newStatus, {int? newScore, notify = true}) {
-    _status = newStatus;
+  changeStatus({required bool isMate, int? newScore, notify = true}) {
+    _isMate = isMate;
     _score = newScore ?? _score;
     if (notify) notifyListeners();
   }

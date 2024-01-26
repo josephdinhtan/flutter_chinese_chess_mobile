@@ -7,9 +7,10 @@ class HistoryPanel extends StatelessWidget {
   const HistoryPanel({
     super.key,
     this.textStyle = const TextStyle(
-      fontSize: 18,
+      fontSize: 16,
       fontWeight: FontWeight.normal,
-      color: Color(0xFF654F4D),
+      //color: Color(0xFF654F4D),
+      color: Colors.white70,
     ),
   });
 
@@ -38,6 +39,7 @@ class HistoryPanel extends StatelessWidget {
                 MoveContainer(
                   text: moves[i],
                   isRed: true,
+                  textStyle: textStyle,
                 ),
                 if (i + 1 < moves.length)
                   Padding(
@@ -45,6 +47,7 @@ class HistoryPanel extends StatelessWidget {
                     child: MoveContainer(
                       text: moves[i],
                       isRed: false,
+                      textStyle: textStyle,
                     ),
                   ),
                 const SizedBox(width: 8.0),

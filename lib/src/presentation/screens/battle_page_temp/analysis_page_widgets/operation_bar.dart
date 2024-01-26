@@ -11,6 +11,8 @@ class OperatorItem {
 class OperationBar extends StatefulWidget {
   final List<OperatorItem> items;
   final Color backgroundColor;
+  final Color textColorExtend;
+  final Color iconColorExtend;
   final Color textColor;
   final Color iconColor;
 
@@ -18,8 +20,10 @@ class OperationBar extends StatefulWidget {
     Key? key,
     required this.items,
     this.backgroundColor = Colors.white,
-    this.textColor = Colors.grey,
-    this.iconColor = Colors.grey,
+    this.textColorExtend = Colors.white,
+    this.iconColorExtend = Colors.amber,
+    this.textColor = Colors.amber,
+    this.iconColor = Colors.amber,
   }) : super(key: key);
 
   @override
@@ -42,7 +46,7 @@ class _OperationBarState extends State<OperationBar> {
 
   void showMore() {
     if (finalChildren.length == widget.items.length) return;
-    final itemStyle = TextStyle(fontSize: 18, color: widget.textColor);
+    final itemStyle = TextStyle(fontSize: 18, color: widget.textColorExtend);
     final moreItems = widget.items.sublist(finalChildren.length);
 
     final children = <Widget>[];
@@ -50,7 +54,7 @@ class _OperationBarState extends State<OperationBar> {
     if (moreItems.length < 5) {
       for (final e in moreItems) {
         children.add(ListTile(
-          leading: Icon(e.iconData, color: widget.iconColor),
+          leading: Icon(e.iconData, color: widget.iconColorExtend),
           title: Text(e.name, style: itemStyle),
           onTap: () {
             Navigator.of(context).pop();
@@ -72,7 +76,7 @@ class _OperationBarState extends State<OperationBar> {
               Expanded(
                 flex: 1,
                 child: ListTile(
-                  leading: Icon(left.iconData, color: widget.iconColor),
+                  leading: Icon(left.iconData, color: widget.iconColorExtend),
                   title: Text(left.name, style: itemStyle),
                   onTap: () {
                     Navigator.of(context).pop();
@@ -86,7 +90,8 @@ class _OperationBarState extends State<OperationBar> {
                 child: right == null
                     ? const SizedBox()
                     : ListTile(
-                        leading: Icon(right.iconData, color: widget.iconColor),
+                        leading:
+                            Icon(right.iconData, color: widget.iconColorExtend),
                         title: Text(right.name, style: itemStyle),
                         onTap: () {
                           Navigator.of(context).pop();
@@ -103,7 +108,7 @@ class _OperationBarState extends State<OperationBar> {
 
     showGlassModalBottomSheet(
         context: context,
-        backgroundOpacity: 1.0,
+        backgroundOpacity: 0.2,
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -171,14 +176,8 @@ class _OperationBarState extends State<OperationBar> {
   @override
   Widget build(BuildContext context) {
     //
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(5),
-        color: widget.backgroundColor,
-      ),
-      //margin: EdgeInsets.symmetric(horizontal: boardPaddingH(context)),
-      //padding: const EdgeInsets.symmetric(vertical: 2),
-      //height: Ruler.kOperationBarHeight,
+    return Card(
+      color: Colors.transparent,
       child: Row(
         children: [
           Expanded(

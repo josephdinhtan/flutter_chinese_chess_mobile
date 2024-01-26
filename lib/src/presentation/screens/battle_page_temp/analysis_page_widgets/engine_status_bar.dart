@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_chinese_chess_ai_mobile/src/utils/extensions/string_extensions.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../utils/logging/prt.dart';
@@ -10,7 +11,8 @@ class EngineStatusBar extends StatelessWidget {
     super.key,
     this.textStyle = const TextStyle(
       fontWeight: FontWeight.w600,
-      color: Color(0xFF654F4D),
+      //color: Color(0xFF654F4D),
+      color: Colors.white70,
     ),
   });
 
@@ -22,9 +24,25 @@ class EngineStatusBar extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Consumer<BattleState>(builder: (context, pageState, child) {
+          var score = 0;
+          var status = "";
+          if (pageState.isMate) {
+            status = pageState.score > 0
+                ? '${pageState.score} nước ĐỎ thắng'.hardCode
+                : '${-pageState.score} nước ĐEN thắng'.hardCode;
+            score = score > 0 ? 10000 : -10000;
+          } else {
+            score = pageState.score;
+            final judge = score == 0
+                ? 'Cân bằng'.hardCode
+                : score > 0
+                    ? 'Đỏ ưu'.hardCode
+                    : 'Đen ưu'.hardCode;
+            status = '$judge ${score > 0 ? score : score * -1} điểm'.hardCode;
+          }
           return _EnginePercentage(
-            score: pageState.score.toDouble(),
-            status: pageState.status,
+            score: score,
+            status: status,
           );
         }),
         Container(
@@ -86,17 +104,17 @@ class _EnginePercentage extends StatelessWidget {
     required this.status,
   });
 
-  final double score;
+  final int score;
   final String status;
 
   @override
   Widget build(BuildContext context) {
-    var percentage = 0.5 - score / 5000;
+    var percentage = 0.5 - score.toDouble() / 5000;
     prt("Jdt score update to: $score, percentage: $percentage");
     if (score == 10000) {
-      percentage = 0;
-    } else if (score == -10000) {
       percentage = 1;
+    } else if (score == -10000) {
+      percentage = 0;
     } else if (percentage > 1) {
       percentage = 0.98;
     } else if (percentage < 0) {

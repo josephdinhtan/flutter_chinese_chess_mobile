@@ -15,7 +15,7 @@ import 'src/presentation/screens/settings_screen/local_db/user_settings_db.dart'
 import 'src/utils/logging/prt.dart';
 
 void main() async {
-  PikafishEngine.isEnable = true;
+  PikafishEngine.isEnable = false;
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const ChessAppAi());
   SystemChrome.setPreferredOrientations(
@@ -28,7 +28,9 @@ void main() async {
     //SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
     // SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
     //     overlays: SystemUiOverlay.values);
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    // SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge, overlays: []);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+        overlays: SystemUiOverlay.values); // to only hide the status bar
   } else if (Platform.isIOS) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack, overlays: []);
   }
@@ -99,7 +101,6 @@ class _ChessAppAiState extends State<ChessAppAi> with WidgetsBindingObserver {
         theme: ThemeData(
           useMaterial3: true,
           //fontFamily: "Ios17Font",
-          primarySwatch: Colors.brown,
         ),
         home: const Scaffold(body: MainMenuScreen()),
         debugShowCheckedModeBanner: false,

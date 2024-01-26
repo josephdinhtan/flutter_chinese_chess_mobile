@@ -27,6 +27,7 @@ dependencies:
   provider: ^6.1.1
   pikafish_engine: ^1.0.3
   in_app_review: ^2.0.8
+  flutter_svg: ^2.0.9
 
 dev_dependencies:
   flutter_test:

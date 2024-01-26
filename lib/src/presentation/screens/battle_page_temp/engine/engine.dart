@@ -147,7 +147,7 @@ class EngineInfo extends Response {
     return result;
   }
 
-  (String, int)? score(BoardState boardState, bool negative) {
+  (bool isMate, int score)? score(BoardState boardState, bool negative) {
     //
     final position = boardState.positionMap;
     final playerSide = boardState.playerSide;
@@ -157,23 +157,27 @@ class EngineInfo extends Response {
 
     final base = (position.sideToMove == playerSide) ? 1 : -1;
     score = score * base * (negative ? -1 : 1);
-
     if (tokens['cp_or_mate'] == 0) {
-      // cp (centipawns)
-      final judge = score == 0
-          ? 'cân bằng'
-          : score > 0
-              ? 'Đỏ ưu'
-              : 'Đen ưu';
-      if (score < 0) score = score * -1;
-      return ('$judge $score điểm', score);
+      return (false, score);
+
+      // if (tokens['cp_or_mate'] == 0) {
+      //   // cp (centipawns)
+      //   final judge = score == 0
+      //       ? 'cân bằng'
+      //       : score > 0
+      //           ? 'Đỏ ưu'
+      //           : 'Đen ưu';
+
+      //   return ('$judge ${score > 0 ? score : score * -1} điểm', score);
     }
 
+    return (true, score);
+
     // mate
-    return (
-      score > 0 ? '$score nước ĐỎ thắng' : '${-score} nước ĐEN thắng',
-      score > 0 ? 10000 : -10000
-    );
+    // return (
+    //   score > 0 ? '$score nước ĐỎ thắng' : '${-score} nước ĐEN thắng',
+    //   score > 0 ? 10000 : -10000
+    // );
   }
 
   String? info(BoardState boardState) {

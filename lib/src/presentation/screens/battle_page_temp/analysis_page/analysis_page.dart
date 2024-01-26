@@ -1,24 +1,21 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import '../../../../utils/extensions/string_extensions.dart';
 import 'package:jdt_ui/jdt_ui.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../utils/extensions/string_extensions.dart';
 import '../../../../utils/logging/prt.dart';
 import '../../../router/router.dart';
 import '../ad/trigger.dart';
-import '../analysis_page_widgets/battle_header.dart';
-import '../analysis_page_widgets/checkbox_list_tile_ex.dart';
-import '../analysis_page_widgets/operation_bar.dart';
+import '../analysis_page_widgets/page_header.dart';
+import '../analysis_page_widgets/engine_status_bar.dart';
 import '../analysis_page_widgets/history_panel.dart';
+import '../analysis_page_widgets/operation_bar.dart';
 import '../analysis_page_widgets/review_panel.dart';
 import '../analysis_page_widgets/snack_bar.dart';
 import '../cchess/cchess_base.dart';
 import '../cchess/cchess_fen.dart';
 import '../cchess/move_name.dart';
-import '../chess_utils/build_utils.dart';
-import '../analysis_page_widgets/engine_status_bar.dart';
-import 'thinking_board.dart';
 import '../engine/analysis.dart';
 import '../engine/cloud_engine.dart';
 import '../engine/engine.dart';
@@ -28,6 +25,7 @@ import '../state_controllers/battle_state.dart';
 import '../state_controllers/board_state.dart';
 import '../state_controllers/game.dart';
 import 'battle_db.dart';
+import 'thinking_board.dart';
 
 class AnalysisPage extends StatefulWidget {
   static const yourTurn = 'Please move';
@@ -107,31 +105,18 @@ class AnalysisPageState extends State<AnalysisPage> {
       builder: (context) => AlertDialog(
         title: Text('Start a new game?', style: GameFonts.uicp()),
         content: SingleChildScrollView(
-          child: Column(
-            children: [
-              CheckboxListTileEx(
-                title: const Text('The other party goes first'),
-                onChanged: (value) => opponentFirst = value,
-                value: opponentFirst,
-              ),
-              CheckboxListTileEx(
-                title: const Text('Players control chess pieces on both sides'),
-                onChanged: (value) => _opponentIsHuman = value,
-                value: _opponentIsHuman,
-              ),
-            ],
-          ),
+          child: Text("Bạn có muốn tạo một mới?".hardCode),
         ),
         actions: <Widget>[
           TextButton(
-            child: const Text('Sure'),
+            child: Text('OK'.hardCode),
             onPressed: () {
               Navigator.of(context).pop();
               newGame(opponentFirst);
             },
           ),
           TextButton(
-            child: const Text('Cancel'),
+            child: Text('Cancel'.hardCode),
             onPressed: () => Navigator.of(context).pop(),
           ),
         ],
@@ -244,22 +229,28 @@ class AnalysisPageState extends State<AnalysisPage> {
     for (var item in items) {
       children.add(
         ListTile(
-          title: Text(item.name!, style: GameFonts.ui(fontSize: 18)),
+          title: Text(item.name!,
+              style: TextStyle(fontSize: 18, color: Colors.white)),
           //subtitle: Text('Probability of winning: ${item.winrate}%'),
-          subtitle: Text('Tỉ lệ chiến thắng: ${item.winrate}%'),
-          trailing: Text('điểm: ${item.score}'),
+          subtitle: Text('Tỉ lệ chiến thắng: ${item.winrate}%',
+              style: TextStyle(fontSize: 14, color: Colors.white70)),
+          trailing: Text('Điểm: ${item.score}',
+              style: TextStyle(fontSize: 18, color: Colors.amber)),
           onTap: () => callback(item),
         ),
       );
-      children.add(const Divider());
+      children.add(Divider(
+        color: Colors.grey.withOpacity(0.5),
+      ));
     }
 
-    children.insert(0, const SizedBox(height: 10));
+    children.insert(0, const SizedBox(height: 4.0));
     children.add(const SizedBox(height: 56));
 
     showGlassModalBottomSheet(
       context: context,
-      backgroundOpacity: 1.0,
+      backgroundOpacity: 0.2,
+      backgroundColor: Colors.white,
       child: Container(
         padding: const EdgeInsets.only(top: 24.0),
         child: SingleChildScrollView(
@@ -346,6 +337,8 @@ class AnalysisPageState extends State<AnalysisPage> {
           _boardState.playerSide,
         );
 
+        await _stopPonder();
+        engineGoHint();
         switch (result) {
           //
           case GameResult.pending:
@@ -368,8 +361,6 @@ class AnalysisPageState extends State<AnalysisPage> {
             //     await engineGo();
             //   }
             // }
-            await _stopPonder();
-            engineGoHint();
             break;
           case GameResult.win:
             gotWin();
@@ -408,7 +399,7 @@ class AnalysisPageState extends State<AnalysisPage> {
       if (PikafishEngine().state != EngineState.pondering) {
         final score = _boardState.engineInfo!.score(_boardState, false);
         if (score != null) {
-          _pageState.changeStatus(score.$1, newScore: score.$2);
+          _pageState.changeStatus(isMate: score.$1, newScore: score.$2);
         }
       }
     } else if (resp is BestMove) {
@@ -429,16 +420,18 @@ class AnalysisPageState extends State<AnalysisPage> {
       }
     } else if (resp is Error) {
       showSnackBar(resp.message);
-      _pageState.changeStatus(resp.message);
+      //_pageState.changeStatus(resp.message);
     }
   }
 
   Future<void> engineGo() async {
     final state = PikafishEngine().state;
     prt("Jdt engineGo state: $state");
-    if (state == EngineState.searching || state == EngineState.hinting) return;
 
-    _pageState.changeStatus('The other party is thinking...');
+    // comment here mean force re-thinking anytime
+    //if (state == EngineState.searching || state == EngineState.hinting) return;
+
+    //_pageState.changeStatus('The other party is thinking...');
 
     await HybridEngine().go(_boardState.positionMap, engineCallback);
   }
@@ -470,7 +463,7 @@ class AnalysisPageState extends State<AnalysisPage> {
     await Future.delayed(const Duration(seconds: 1));
 
     prt("Jdt engineGoHint Engine thinking...");
-    _pageState.changeStatus('Engine thinking...');
+    //_pageState.changeStatus('Engine thinking...');
     await HybridEngine().goHint(_boardState.positionMap, engineCallback);
   }
 
@@ -566,53 +559,26 @@ class AnalysisPageState extends State<AnalysisPage> {
 
   @override
   Widget build(BuildContext context) {
-    //
-    final ratingScore = createRatingScore(
-      context,
-      rightAction: () async {
-        //
-        await HybridEngine().stop();
-
-        _boardState.engineInfo = null;
-        _boardState.bestMove = null;
-
-        if (!mounted) return;
-
-        // Settings button
-        // await Navigator.of(context).push(
-        //   CupertinoPageRoute(
-        //     builder: (context) => const SettingsPage(),
-        //   ),
-        // );
-
-        if (_boardState.isOpponentTurn && !_opponentIsHuman) {
-          prt("Jdt _opponent is Machine, trying move");
-          engineGo();
-        } else {
-          prt("Jdt _opponent is Human");
-          _pageState.changeStatus(AnalysisPage.yourTurn);
-        }
-      },
-    );
-    final operatorBar = OperationBar(items: [
+    final operatorBar =
+        OperationBar(backgroundColor: Colors.white.withOpacity(0.1), items: [
       OperatorItem(
-          name: 'Undo',
+          name: 'Lùi'.hardCode,
           iconData: Icons.arrow_back_ios_rounded,
           onPressed: regret),
+      // OperatorItem(
+      //     name: 'Go',
+      //     iconData: Icons.arrow_forward_ios_rounded,
+      //     onPressed: regret),
       OperatorItem(
-          name: 'Go',
-          iconData: Icons.arrow_forward_ios_rounded,
-          onPressed: regret),
-      OperatorItem(
-          name: 'Hint',
+          name: 'Gợi ý'.hardCode,
           iconData: Icons.saved_search_rounded,
           onPressed: engineGoHint),
       OperatorItem(
-          name: 'Flip',
+          name: 'Lật'.hardCode,
           iconData: Icons.flip_camera_android_rounded,
           onPressed: flipBoard),
       OperatorItem(
-          name: 'New',
+          name: 'Tạo mới'.hardCode,
           iconData: Icons.crop_square_outlined,
           onPressed: confirmNewGame),
       OperatorItem(
@@ -628,7 +594,8 @@ class AnalysisPageState extends State<AnalysisPage> {
       ),
       OperatorItem(
           name: 'Lưu hình cờ',
-          iconData: Icons.shape_line_outlined,
+          //iconData: Icons.shape_line_outlined,
+          iconData: Icons.stars,
           onPressed: saveManual),
       OperatorItem(
           name: 'Lưu toàn bộ ván cờ',
@@ -645,22 +612,31 @@ class AnalysisPageState extends State<AnalysisPage> {
         //         fit: BoxFit.cover)),
         // color: GameColors.darkBackground,
         //color: Color.fromRGBO(242, 242, 247, 1),
-        color: const Color(0xFFEDE8E0),
-        child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              BattleHeader(
-                title: "Phân Tích".capitalize.hardCode,
-                iconData: Icons.saved_search,
-              ),
-              const EngineStatusBar(),
-              ThinkingBoard(
-                onBoardTap: onBoardTap,
-                boardBackgroundColor: const Color(0xFFdfb87e),
-              ),
-              const Expanded(child: HistoryPanel()),
-              operatorBar
-            ]),
+        constraints: const BoxConstraints.expand(),
+        decoration: const BoxDecoration(
+            image: DecorationImage(
+                image: AssetImage("assets/images/main_menu_background.jpg"),
+                fit: BoxFit.cover)),
+        //color: const Color(0xFFEDE8E0),
+        child: SafeArea(
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                PageHeader(
+                  title: "Phân Tích".capitalize.hardCode,
+                  titleColor: Colors.white,
+                  // iconData: Icons.saved_search,
+                  svgIconPath: "assets/images/searching_robo.svg",
+                ),
+                const EngineStatusBar(),
+                ThinkingBoard(
+                  onBoardTap: onBoardTap,
+                  boardBackgroundColor: const Color(0xFFdfb87e),
+                ),
+                const Expanded(child: HistoryPanel()),
+                operatorBar
+              ]),
+        ),
       ),
     );
   }
